@@ -4,25 +4,16 @@ using Xunit;
 
 namespace ZiziBot.Tests.Pipelines;
 
-public class PingTest
+public class PingTest(MediatorService mediatorService, IOptionsSnapshot<List<SimpleTelegramBotClientOptions>> botOptions)
 {
-    private readonly MediatorService _mediatorService;
-    private readonly IOptionsSnapshot<List<SimpleTelegramBotClientOptions>> _botOptions;
-
-    private List<SimpleTelegramBotClientOptions> ListBotData => _botOptions.Value;
-
-    public PingTest(MediatorService mediatorService, IOptionsSnapshot<List<SimpleTelegramBotClientOptions>> botOptions)
-    {
-        _mediatorService = mediatorService;
-        _botOptions = botOptions;
-    }
+    private List<SimpleTelegramBotClientOptions> ListBotData => botOptions.Value;
 
     [Fact]
     public async Task Ping()
     {
         foreach (var botData in ListBotData)
         {
-            await _mediatorService.EnqueueAsync(new PingBotRequestModel
+            await mediatorService.EnqueueAsync(new PingBotRequestModel
             {
                 BotToken = botData.Token,
                 Message = SampleMessages.CommonMessage

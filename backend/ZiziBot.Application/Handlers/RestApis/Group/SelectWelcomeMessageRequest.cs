@@ -5,8 +5,7 @@ namespace ZiziBot.Application.Handlers.RestApis.Group;
 
 public class SelectWelcomeMessageRequest : ApiRequestBase<object>
 {
-    [FromBody]
-    public SelectWelcomeMessageRequestModel Model { get; set; }
+    [FromBody] public SelectWelcomeMessageRequestModel Model { get; set; }
 }
 
 public class SelectWelcomeMessageRequestModel
@@ -15,20 +14,15 @@ public class SelectWelcomeMessageRequestModel
     public string WelcomeId { get; set; }
 }
 
-public class SelectWelcomeMessageHandler : IRequestHandler<SelectWelcomeMessageRequest, ApiResponseBase<object>>
+public class SelectWelcomeMessageHandler(
+    DataFacade dataFacade
+) : IRequestHandler<SelectWelcomeMessageRequest, ApiResponseBase<object>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public SelectWelcomeMessageHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<ApiResponseBase<object>> Handle(SelectWelcomeMessageRequest request, CancellationToken cancellationToken)
     {
         var response = new ApiResponseBase<object>();
 
-        var listWelcomeMessage = await _mongoDbContext.WelcomeMessage
+        var listWelcomeMessage = await dataFacade.MongoDb.WelcomeMessage
             .Where(entity => entity.ChatId == request.Model.ChatId)
             .Where(entity => entity.Status != (int)EventStatus.Deleted)
             .Where(entity => request.ListChatId.Contains(entity.ChatId))
@@ -52,7 +46,7 @@ public class SelectWelcomeMessageHandler : IRequestHandler<SelectWelcomeMessageR
 
         selectedWelcome.Status = (int)EventStatus.Complete;
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return response.Success("Welcome Message activated successfully.", true);
     }

@@ -3,20 +3,13 @@ using MongoFramework.Linq;
 
 namespace ZiziBot.Application.Tasks;
 
-public class RegisterShalatTimeTask : IStartupTask
+public class RegisterShalatTimeTask(MongoDbContextBase mongoDbContext) : IStartupTask
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
     public bool SkipAwait { get; set; }
-
-    public RegisterShalatTimeTask(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
 
     public async Task ExecuteAsync()
     {
-        var cities = await _mongoDbContext.BangHasan_ShalatCity
+        var cities = await mongoDbContext.BangHasan_ShalatCity
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .Select(entity => entity.ChatId)
             .Distinct()

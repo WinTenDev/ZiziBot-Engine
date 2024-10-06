@@ -21,30 +21,19 @@ public class CheckConsoleSessionResponseDto
     public string BearerToken { get; set; }
 }
 
-public class CheckConsoleSessionHandler : IRequestHandler<CheckConsoleSessionRequest,
-    WebResponseBase<CheckConsoleSessionResponseDto>>
+public class CheckConsoleSessionHandler(
+    ILogger<CheckConsoleSessionHandler> logger,
+    MongoDbContextBase mongoDbContext,
+    AppSettingRepository appSettingRepository)
+    : IRequestHandler<CheckConsoleSessionRequest,
+        WebResponseBase<CheckConsoleSessionResponseDto>>
 {
-    private readonly ILogger<CheckConsoleSessionHandler> _logger;
-    private readonly MongoDbContextBase _mongoDbContext;
-    private readonly AppSettingRepository _appSettingRepository;
-
-    public CheckConsoleSessionHandler(
-        ILogger<CheckConsoleSessionHandler> logger,
-        MongoDbContextBase mongoDbContext,
-        AppSettingRepository appSettingRepository
-    )
-    {
-        _logger = logger;
-        _mongoDbContext = mongoDbContext;
-        _appSettingRepository = appSettingRepository;
-    }
-
     public async Task<WebResponseBase<CheckConsoleSessionResponseDto>> Handle(CheckConsoleSessionRequest request,
         CancellationToken cancellationToken)
     {
         WebResponseBase<CheckConsoleSessionResponseDto> response = new();
 
-        var botSetting = await _mongoDbContext.BotSettings
+        var botSetting = await mongoDbContext.BotSettings
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .Where(entity => entity.Name == "Main")
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -64,13 +53,13 @@ public class CheckConsoleSessionHandler : IRequestHandler<CheckConsoleSessionReq
         var checkAuthorization = loginWidget.CheckAuthorization(sessionData);
         if (checkAuthorization != WebAuthorization.Valid)
         {
-            _logger.LogDebug("Session is not valid for SessionId: {SessionId}. Result: {Result}",
+            logger.LogDebug("Session is not valid for SessionId: {SessionId}. Result: {Result}",
                 request.Model.SessionId, checkAuthorization);
             return response.Unauthorized(
                 $"Sesi tidak valid, silakan kirim ulang perintah '/console' di Bot untuk membuat sesi baru.");
         }
 
-        var jwtConfig = await _appSettingRepository.GetConfigSectionAsync<JwtConfig>();
+        var jwtConfig = await appSettingRepository.GetConfigSectionAsync<JwtConfig>();
 
         if (jwtConfig == null)
         {
@@ -81,7 +70,7 @@ public class CheckConsoleSessionHandler : IRequestHandler<CheckConsoleSessionReq
             "Guest"
         };
 
-        var findSudo = await _mongoDbContext.Sudoers.AsNoTracking()
+        var findSudo = await mongoDbContext.Sudoers.AsNoTracking()
             .Where(x => x.Status == (int)EventStatus.Complete)
             .Where(x => x.UserId == request.Model.Id)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -107,7 +96,7 @@ public class CheckConsoleSessionHandler : IRequestHandler<CheckConsoleSessionReq
             expires: DateTime.Now.AddMinutes(15), signingCredentials: credentials);
         var stringToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        _mongoDbContext.DashboardSessions.Add(new DashboardSessionEntity() {
+        mongoDbContext.DashboardSessions.Add(new DashboardSessionEntity() {
             TelegramUserId = request.Model.Id,
             FirstName = request.Model.FirstName,
             LastName = request.Model.LastName,
@@ -120,7 +109,7 @@ public class CheckConsoleSessionHandler : IRequestHandler<CheckConsoleSessionReq
             Status = (int)EventStatus.Complete
         });
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await mongoDbContext.SaveChangesAsync(cancellationToken);
 
         return response.Success("Session saved successfully", new CheckConsoleSessionResponseDto() {
             IsSessionValid = true,

@@ -11,8 +11,7 @@ namespace ZiziBot.Application.Handlers.RestApis.DashboardSession;
 
 public class SaveTelegramSessionRequest : ApiRequestBase<SaveDashboardSessionIdResponseDto>
 {
-    [FromBody]
-    public TelegramSessionDto Model { get; set; }
+    [FromBody] public TelegramSessionDto Model { get; set; }
 }
 
 public class SaveDashboardSessionIdResponseDto
@@ -21,30 +20,18 @@ public class SaveDashboardSessionIdResponseDto
     public string BearerToken { get; set; }
 }
 
-public class SaveTelegramSessionRequestHandler : IRequestHandler<SaveTelegramSessionRequest,
-    ApiResponseBase<SaveDashboardSessionIdResponseDto>>
+public class SaveTelegramSessionRequestHandler(
+    ILogger<SaveTelegramSessionRequestHandler> logger,
+    DataFacade dataFacade
+)
+    : IRequestHandler<SaveTelegramSessionRequest, ApiResponseBase<SaveDashboardSessionIdResponseDto>>
 {
-    private readonly ILogger<SaveTelegramSessionRequestHandler> _logger;
-    private readonly MongoDbContextBase _mongoDbContext;
-    private readonly AppSettingRepository _appSettingRepository;
-
-    public SaveTelegramSessionRequestHandler(
-        ILogger<SaveTelegramSessionRequestHandler> logger,
-        MongoDbContextBase mongoDbContext,
-        AppSettingRepository appSettingRepository
-    )
-    {
-        _logger = logger;
-        _mongoDbContext = mongoDbContext;
-        _appSettingRepository = appSettingRepository;
-    }
-
     public async Task<ApiResponseBase<SaveDashboardSessionIdResponseDto>> Handle(SaveTelegramSessionRequest request,
         CancellationToken cancellationToken)
     {
         ApiResponseBase<SaveDashboardSessionIdResponseDto> response = new();
 
-        var botSetting = await _mongoDbContext.BotSettings
+        var botSetting = await dataFacade.MongoDb.BotSettings
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .Where(entity => entity.Name == "Main")
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -64,13 +51,14 @@ public class SaveTelegramSessionRequestHandler : IRequestHandler<SaveTelegramSes
         var checkAuthorization = loginWidget.CheckAuthorization(sessionData);
         if (checkAuthorization != WebAuthorization.Valid)
         {
-            _logger.LogDebug("Session is not valid for SessionId: {SessionId}. Result: {Result}",
+            logger.LogDebug("Session is not valid for SessionId: {SessionId}. Result: {Result}",
                 request.Model.SessionId, checkAuthorization);
+
             return response.Unauthorized(
                 $"Sesi tidak valid, silakan kirim ulang perintah '/console' di Bot untuk membuat sesi baru.");
         }
 
-        var jwtConfig = await _appSettingRepository.GetConfigSectionAsync<JwtConfig>();
+        var jwtConfig = await dataFacade.AppSetting.GetConfigSectionAsync<JwtConfig>();
 
         if (jwtConfig == null)
         {
@@ -89,9 +77,10 @@ public class SaveTelegramSessionRequestHandler : IRequestHandler<SaveTelegramSes
 
         var token = new JwtSecurityToken(jwtConfig.Issuer, jwtConfig.Audience, claims,
             expires: DateTime.Now.AddMinutes(15), signingCredentials: credentials);
+
         var stringToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        _mongoDbContext.DashboardSessions.Add(new DashboardSessionEntity() {
+        dataFacade.MongoDb.DashboardSessions.Add(new DashboardSessionEntity() {
             TelegramUserId = request.Model.Id,
             FirstName = request.Model.FirstName,
             LastName = request.Model.LastName,
@@ -104,7 +93,7 @@ public class SaveTelegramSessionRequestHandler : IRequestHandler<SaveTelegramSes
             Status = (int)EventStatus.Complete
         });
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return response.Success("Session saved successfully", new SaveDashboardSessionIdResponseDto() {
             IsSessionValid = true,

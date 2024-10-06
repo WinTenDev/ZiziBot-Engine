@@ -1,6 +1,4 @@
-﻿using ZiziBot.Application.Facades;
-
-namespace ZiziBot.Application.Handlers.Telegram.WordFilter;
+﻿namespace ZiziBot.Application.Handlers.Telegram.WordFilter;
 
 public class AddWordFilterRequest : BotRequestBase
 {
@@ -8,17 +6,17 @@ public class AddWordFilterRequest : BotRequestBase
 }
 
 public class AddWordFilterHandler(
-    TelegramService telegramService,
+    ServiceFacade serviceFacade,
     DataFacade dataFacade
 ) : IBotRequestHandler<AddWordFilterRequest>
 {
     public async Task<BotResponseBase> Handle(AddWordFilterRequest request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         if (request.Word.IsNullOrEmpty())
         {
-            return await telegramService.SendMessageAsync("Apa kata yang ingin ditambahkan?");
+            return await serviceFacade.TelegramService.SendMessageAsync("Apa kata yang ingin ditambahkan?");
         }
 
         List<PipelineResultAction> action = new();
@@ -47,6 +45,6 @@ public class AddWordFilterHandler(
             TransactionId = request.TransactionId
         });
 
-        return await telegramService.SendMessageAsync("Kata berhasil disimpan");
+        return await serviceFacade.TelegramService.SendMessageAsync("Kata berhasil disimpan");
     }
 }

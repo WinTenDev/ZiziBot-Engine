@@ -7,9 +7,10 @@ namespace ZiziBot.Application.Handlers.Telegram.Group;
 
 public class EnsureChatAdminRequestHandler<TRequest, TResponse>(
     ILogger<EnsureChatAdminRequestHandler<TRequest, TResponse>> logger,
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext
-) : IRequestPostProcessor<TRequest, TResponse>
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+)
+    : IRequestPostProcessor<TRequest, TResponse>
     where TRequest : BotRequestBase, IRequest<TResponse>
     where TResponse : BotResponseBase
 {
@@ -21,17 +22,17 @@ public class EnsureChatAdminRequestHandler<TRequest, TResponse>(
             request.InlineQuery != null)
             return;
 
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        mongoDbContext.ChatAdmin
+        dataFacade.MongoDb.ChatAdmin
             .RemoveRange(
                 entity =>
                     entity.ChatId == request.ChatIdentifier
             );
 
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-        var chatAdministrators = await telegramService.GetChatAdministrator();
+        var chatAdministrators = await serviceFacade.TelegramService.GetChatAdministrator();
         logger.LogDebug("List of Administrator in ChatId: {ChatId} found {ChatAdministrators} item(s)", request.ChatId,
             chatAdministrators.Count);
 
@@ -46,8 +47,8 @@ public class EnsureChatAdminRequestHandler<TRequest, TResponse>(
             )
             .ToList();
 
-        mongoDbContext.ChatAdmin.AddRange(chatAdminEntities);
+        dataFacade.MongoDb.ChatAdmin.AddRange(chatAdminEntities);
 
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
     }
 }

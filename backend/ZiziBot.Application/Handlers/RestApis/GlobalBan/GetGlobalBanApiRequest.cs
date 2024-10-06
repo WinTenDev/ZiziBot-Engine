@@ -3,8 +3,7 @@ using MongoFramework.Linq;
 namespace ZiziBot.Application.Handlers.RestApis.GlobalBan;
 
 public class GetGlobalBanApiRequest : ApiRequestBase<List<GetGlobalBanApiResponse>>
-{
-}
+{ }
 
 public class GetGlobalBanApiResponse
 {
@@ -17,23 +16,17 @@ public class GetGlobalBanApiResponse
     public DateTime UpdatedDate { get; set; }
 }
 
-public class GetGlobalBanApiHandler : IRequestHandler<GetGlobalBanApiRequest, ApiResponseBase<List<GetGlobalBanApiResponse>>>
+public class GetGlobalBanApiHandler(
+    DataFacade dataFacade
+) : IRequestHandler<GetGlobalBanApiRequest, ApiResponseBase<List<GetGlobalBanApiResponse>>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public GetGlobalBanApiHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<ApiResponseBase<List<GetGlobalBanApiResponse>>> Handle(GetGlobalBanApiRequest request, CancellationToken cancellationToken)
     {
         var response = new ApiResponseBase<List<GetGlobalBanApiResponse>>();
 
-        var globalBanEntities = await _mongoDbContext.GlobalBan.ToListAsync(cancellationToken: cancellationToken);
+        var globalBanEntities = await dataFacade.MongoDb.GlobalBan.ToListAsync(cancellationToken: cancellationToken);
 
-        var listGlobalBan = globalBanEntities.Select(entity => new GetGlobalBanApiResponse()
-        {
+        var listGlobalBan = globalBanEntities.Select(entity => new GetGlobalBanApiResponse() {
             UserId = entity.UserId,
             ChatId = entity.ChatId,
             Reason = entity.Reason,

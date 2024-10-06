@@ -6,35 +6,34 @@ public class DisableWordFilterRequest : BotRequestBase
 }
 
 public class DisableWordFilterHandler(
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext,
-    WordFilterRepository wordFilterRepository
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IBotRequestHandler<DisableWordFilterRequest>
 {
     public async Task<BotResponseBase> Handle(DisableWordFilterRequest request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         if (request.Word == null)
         {
-            return await telegramService.SendMessageAsync("Apa Word yang ingin dimatikan?");
+            return await serviceFacade.TelegramService.SendMessageAsync("Apa Word yang ingin dimatikan?");
         }
 
-        var wordFilter = await mongoDbContext.WordFilter
+        var wordFilter = await dataFacade.MongoDb.WordFilter
             .Where(x => x.Word == request.Word)
             .Where(x => x.Status == (int)EventStatus.Complete)
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (wordFilter == null)
         {
-            return await telegramService.SendMessageAsync("Word tidak ditemukan");
+            return await serviceFacade.TelegramService.SendMessageAsync("Word tidak ditemukan");
         }
 
         wordFilter.Status = (int)EventStatus.Inactive;
 
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
-        await wordFilterRepository.GetAllAsync(true);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
+        await dataFacade.WordFilter.GetAllAsync(true);
 
-        return await telegramService.SendMessageAsync("Word berhasil dimatikan");
+        return await serviceFacade.TelegramService.SendMessageAsync("Word berhasil dimatikan");
     }
 }

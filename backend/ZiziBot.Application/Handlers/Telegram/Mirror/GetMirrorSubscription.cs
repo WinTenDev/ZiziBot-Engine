@@ -4,40 +4,30 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace ZiziBot.Application.Handlers.Telegram.Mirror;
 
 public class GetMirrorSubscriptionBotRequest : BotRequestBase
+{ }
+
+public class GetMirrorSubscriptionHandler(
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+)
+    : IRequestHandler<GetMirrorSubscriptionBotRequest, BotResponseBase>
 {
-
-}
-
-public class GetMirrorSubscriptionHandler : IRequestHandler<GetMirrorSubscriptionBotRequest, BotResponseBase>
-{
-    private readonly TelegramService _telegramService;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public GetMirrorSubscriptionHandler(TelegramService telegramService, MongoDbContextBase mongoDbContext)
-    {
-        _telegramService = telegramService;
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<BotResponseBase> Handle(GetMirrorSubscriptionBotRequest request, CancellationToken cancellationToken)
     {
         var htmlMessage = HtmlMessage.Empty;
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var mirrorSubscription = await _mongoDbContext.MirrorUsers
+        var mirrorSubscription = await dataFacade.MongoDb.MirrorUsers
             .FirstOrDefaultAsync(x =>
                     x.UserId == request.UserId &&
                     x.Status == (int)EventStatus.Complete,
                 cancellationToken: cancellationToken);
 
-        var replyMarkup = new InlineKeyboardMarkup(new[]
-        {
-            new[]
-            {
+        var replyMarkup = new InlineKeyboardMarkup(new[] {
+            new[] {
                 InlineKeyboardButton.WithUrl("Mengapa donasi?", "https://docs.mirror.winten.my.id/donasi")
             },
-            new[]
-            {
+            new[] {
                 InlineKeyboardButton.WithUrl("Donasi", "https://t.me/ContactWinTenBot?start=donate"),
                 InlineKeyboardButton.WithUrl("Donate", "https://t.me/ContactWinTenBot?start=donate")
             }
@@ -48,7 +38,7 @@ public class GetMirrorSubscriptionHandler : IRequestHandler<GetMirrorSubscriptio
             htmlMessage.Bold("Anda belum berlangganan Mirror").Br()
                 .Text("Silahkan Donasi untuk mendapatkan akses mirror").Br();
 
-            return await _telegramService.SendMessageText(text: htmlMessage.ToString(), replyMarkup: replyMarkup);
+            return await serviceFacade.TelegramService.SendMessageText(text: htmlMessage.ToString(), replyMarkup: replyMarkup);
         }
 
         htmlMessage.BoldBr("🪞 Langganan Mirror")
@@ -58,6 +48,6 @@ public class GetMirrorSubscriptionHandler : IRequestHandler<GetMirrorSubscriptio
             .Bold("⏱ Sejak: ").CodeBr(mirrorSubscription.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss"))
             .Bold("⏳ Durasi: ").CodeBr(mirrorSubscription.Duration.ForHuman(4));
 
-        return await _telegramService.SendMessageText(text: htmlMessage.ToString(), replyMarkup: replyMarkup);
+        return await serviceFacade.TelegramService.SendMessageText(text: htmlMessage.ToString(), replyMarkup: replyMarkup);
     }
 }

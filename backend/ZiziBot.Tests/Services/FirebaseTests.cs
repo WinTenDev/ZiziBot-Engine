@@ -2,15 +2,8 @@ using Xunit;
 
 namespace ZiziBot.Tests.Services;
 
-public class FirebaseTests : IAsyncLifetime
+public class FirebaseTests(FirebaseService firebaseService) : IAsyncLifetime
 {
-    private readonly FirebaseService _firebaseService;
-
-    public FirebaseTests(FirebaseService firebaseService)
-    {
-        _firebaseService = firebaseService;
-    }
-
     [Fact]
     public async Task FirebasePostTest()
     {
@@ -21,7 +14,7 @@ public class FirebaseTests : IAsyncLifetime
 
         var path = "test/post/" + Guid.NewGuid();
 
-        await _firebaseService.PostAsync(path, data);
+        await firebaseService.PostAsync(path, data);
 
         Assert.True(true);
     }
@@ -37,7 +30,7 @@ public class FirebaseTests : IAsyncLifetime
 
         var path = "test/put";
 
-        await _firebaseService.PutAsync(path, data);
+        await firebaseService.PutAsync(path, data);
 
         Assert.True(true);
     }
@@ -49,6 +42,6 @@ public class FirebaseTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _firebaseService.DeleteAsync("test");
+        await firebaseService.DeleteAsync("test");
     }
 }

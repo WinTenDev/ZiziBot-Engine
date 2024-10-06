@@ -1,14 +1,12 @@
 ﻿using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
-using MongoFramework.Linq;
-using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.Application.Handlers.Telegram.Basic;
 
 public class UpsertBotUserHandler<TRequest, TResponse>(
     ILogger<UpsertBotUserHandler<TRequest, TResponse>> logger,
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext
+    ServiceFacade serviceFacade,
+    DataFacade dataFacade
 ) : IRequestPostProcessor<TRequest, TResponse>
     where TRequest : BotRequestBase, IRequest<TResponse>
     where TResponse : BotResponseBase
@@ -23,61 +21,27 @@ public class UpsertBotUserHandler<TRequest, TResponse>(
 
         request.DeleteAfter = TimeSpan.FromDays(1);
 
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var botUser = await mongoDbContext.BotUser
-            .Where(entity => entity.UserId == request.UserId)
-            .Where(entity => entity.Status == (int)EventStatus.Complete)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var userActivity = await dataFacade.ChatSetting.SaveUserActivity(new BotUserDto() {
+            User = request.User,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            LanguageCode = request.UserLanguageCode,
+            Username = request.Username,
+            UserId = request.UserId,
+            TransactionId = request.TransactionId
+        });
 
-        if (botUser == null)
+
+        if (!string.IsNullOrEmpty(userActivity))
         {
-            logger.LogDebug("Adding User with UserId: {UserId}", request.UserId);
+            var message = HtmlMessage.Empty
+                .Bold("Pengguna: ").User(request.User).Br()
+                .Append(new HtmlMessage());
 
-            mongoDbContext.BotUser.Add(new BotUserEntity() {
-                UserId = request.UserId,
-                Username = request.User?.Username,
-                FirstName = request.User?.FirstName,
-                LastName = request.User?.LastName,
-                LanguageCode = request.UserLanguageCode,
-                Status = (int)EventStatus.Complete,
-                TransactionId = request.TransactionId
-            });
+            await serviceFacade.TelegramService.SendMessageAsync(message.ToString());
         }
-        else
-        {
-            logger.LogDebug("Updating User with UserId: {UserId}", request.UserId);
-
-            var trackingMessage = HtmlMessage.Empty;
-
-            if (botUser.FirstName != request.User?.FirstName)
-                trackingMessage.TextBr("Mengubah nama depannya");
-
-            if (botUser.LastName != request.User?.LastName)
-                trackingMessage.TextBr("Mengubah nama belakangnya");
-
-            if (botUser.Username != request.User?.Username)
-                trackingMessage.TextBr("Mengubah username-nya");
-
-            if (!trackingMessage.IsEmpty)
-            {
-                var message = HtmlMessage.Empty
-                    .Bold("Pengguna: ").User(request.User).Br()
-                    .Append(trackingMessage);
-
-                await telegramService.SendMessageAsync(message.ToString());
-            }
-
-            botUser.UserId = request.UserId;
-            botUser.Username = request.User?.Username;
-            botUser.FirstName = request.User?.FirstName;
-            botUser.LastName = request.User?.LastName;
-            botUser.LanguageCode = request.UserLanguageCode;
-            botUser.Status = (int)EventStatus.Complete;
-            botUser.TransactionId = request.TransactionId;
-        }
-
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("User information for UserId: {UserId} has been updated", request.UserId);
     }

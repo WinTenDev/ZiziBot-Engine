@@ -7,19 +7,12 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class ChatController : CommandController
+public class ChatController(MediatorService mediatorServiceService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public ChatController(MediatorService mediatorServiceService)
-    {
-        _mediatorService = mediatorServiceService;
-    }
-
     [Command("fch")]
     public async Task AddForwardChannelSource(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new ConnectChannelPostRequest()
+        await mediatorServiceService.EnqueueAsync(new ConnectChannelPostRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -37,7 +30,7 @@ public class ChatController : CommandController
     [Command("pin")]
     public async Task PinMessage(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new PinMessageRequest()
+        await mediatorServiceService.EnqueueAsync(new PinMessageRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -54,7 +47,7 @@ public class ChatController : CommandController
     [UpdateCommand(UpdateType.ChatJoinRequest)]
     public async Task JoinRequest(UpdateData data)
     {
-        await _mediatorService.EnqueueAsync(new ChatJoinBotRequest()
+        await mediatorServiceService.EnqueueAsync(new ChatJoinBotRequest()
         {
             BotToken = data.Options.Token,
             Update = data.Update,
@@ -69,7 +62,7 @@ public class ChatController : CommandController
     [TypedCommand(MessageType.ChatMembersAdded)]
     public async Task NewChatMembers(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new NewChatMembersBotRequest()
+        await mediatorServiceService.EnqueueAsync(new NewChatMembersBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -86,7 +79,7 @@ public class ChatController : CommandController
     [UpdateCommand(UpdateType.EditedChannelPost)]
     public async Task ChannelPost(UpdateData data)
     {
-        await _mediatorService.EnqueueAsync(new ForwardChannelPostRequest()
+        await mediatorServiceService.EnqueueAsync(new ForwardChannelPostRequest()
         {
             BotToken = data.Options.Token,
             Update = data.Update

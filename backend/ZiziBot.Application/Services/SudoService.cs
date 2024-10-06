@@ -3,23 +3,14 @@ using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.Application.Services;
 
-public class SudoService
+public class SudoService(MongoDbContextBase mongoDbContext, CacheService cacheService)
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-    private readonly CacheService _cacheService;
-
-    public SudoService(MongoDbContextBase mongoDbContext, CacheService cacheService)
-    {
-        _mongoDbContext = mongoDbContext;
-        _cacheService = cacheService;
-    }
-
     public async Task<bool> IsSudoAsync(long userId)
     {
-        var cache = await _cacheService.GetOrSetAsync(
+        var cache = await cacheService.GetOrSetAsync(
             cacheKey: CacheKey.GLOBAL_SUDO + userId,
             action: async () => {
-                return await _mongoDbContext.Sudoers.AnyAsync(
+                return await mongoDbContext.Sudoers.AnyAsync(
                     x =>
                         x.UserId == userId &&
                         x.Status == (int)EventStatus.Complete
@@ -34,7 +25,7 @@ public class SudoService
     {
         ServiceResult serviceResult = new();
 
-        var findSudo = await _mongoDbContext.Sudoers
+        var findSudo = await mongoDbContext.Sudoers
             .FirstOrDefaultAsync(x => x.UserId == entity.UserId);
 
         if (findSudo != null)
@@ -42,8 +33,8 @@ public class SudoService
             return serviceResult.Complete("This user is already a sudoer.");
         }
 
-        _mongoDbContext.Sudoers.Add(entity);
-        await _mongoDbContext.SaveChangesAsync();
+        mongoDbContext.Sudoers.Add(entity);
+        await mongoDbContext.SaveChangesAsync();
 
         return serviceResult.Complete("Sudoer added successfully.");
     }

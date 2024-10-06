@@ -13,9 +13,9 @@ public class DataFacade(
     GroupRepository groupRepository,
     MirrorUserRepository mirrorUserRepository,
     WordFilterRepository wordFilterRepository
-)
+) : IDataFacade
 {
-    public ICacheService Cache = cacheService;
+    public ICacheService Cache { get; } = cacheService;
 
     public MongoDbContextBase MongoDb => mongoDb;
     public MongoEfContext MongoEf => mongoEf;

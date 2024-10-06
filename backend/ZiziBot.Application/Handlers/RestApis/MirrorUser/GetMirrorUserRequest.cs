@@ -4,8 +4,7 @@ using MongoFramework.Linq;
 namespace ZiziBot.Application.Handlers.RestApis.MirrorUser;
 
 public class GetMirrorUsersRequestDto : ApiRequestBase<IEnumerable<GetMirrorUserResponseDto>>
-{
-}
+{ }
 
 public class GetMirrorUserResponseDto
 {
@@ -18,24 +17,19 @@ public class GetMirrorUserResponseDto
     public DateTime LastUpdate { get; set; }
 }
 
-public class GetMirrorUsersRequestHandler : IApiRequestHandler<GetMirrorUsersRequestDto, IEnumerable<GetMirrorUserResponseDto>>
+public class GetMirrorUsersRequestHandler(
+    DataFacade dataFacade
+) : IApiRequestHandler<GetMirrorUsersRequestDto, IEnumerable<GetMirrorUserResponseDto>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
     private readonly ApiResponseBase<IEnumerable<GetMirrorUserResponseDto>> _response = new();
-
-    public GetMirrorUsersRequestHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
 
     public async Task<ApiResponseBase<IEnumerable<GetMirrorUserResponseDto>>> Handle(GetMirrorUsersRequestDto request, CancellationToken cancellationToken)
     {
-        var user = await _mongoDbContext.MirrorUsers
+        var user = await dataFacade.MongoDb.MirrorUsers
             .Where(mirrorUser => mirrorUser.Status == (int)EventStatus.Complete)
             .ToListAsync(cancellationToken: cancellationToken);
 
-        var mirrorUsers = user.Select(mirrorUser => new GetMirrorUserResponseDto
-        {
+        var mirrorUsers = user.Select(mirrorUser => new GetMirrorUserResponseDto {
             Id = mirrorUser.Id,
             UserId = mirrorUser.UserId,
             ExpireDate = mirrorUser.ExpireDate,

@@ -4,22 +4,13 @@ using Microsoft.Extensions.Options;
 
 namespace ZiziBot.Application.Services;
 
-public class OptiicDevService
+public class OptiicDevService(ILogger<OptiicDevService> logger, IOptionsSnapshot<OptiicDevConfig> options)
 {
-    private readonly ILogger<OptiicDevService> _logger;
-    private readonly IOptionsSnapshot<OptiicDevConfig> _options;
-
-    private OptiicDevConfig OptiicDevConfig => _options.Value;
-
-    public OptiicDevService(ILogger<OptiicDevService> logger, IOptionsSnapshot<OptiicDevConfig> options)
-    {
-        _logger = logger;
-        _options = options;
-    }
+    private OptiicDevConfig OptiicDevConfig => options.Value;
 
     public async Task<OptiicDevOcrResult> ScanImageAsync(string fileName)
     {
-        _logger.LogInformation("Scanning image {fileName}", fileName);
+        logger.LogInformation("Scanning image {fileName}", fileName);
 
         var apiKey = OptiicDevConfig.ApiKeys.RandomPick();
 

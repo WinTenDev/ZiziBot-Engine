@@ -6,16 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace ZiziBot.Services;
 
-public class FirebaseService
+public class FirebaseService(IOptions<GcpConfig> options)
 {
-    private readonly IOptions<GcpConfig> _options;
-
-    private GcpConfig GcpConfig => _options.Value;
-
-    public FirebaseService(IOptions<GcpConfig> options)
-    {
-        _options = options;
-    }
+    private GcpConfig GcpConfig => options.Value;
 
     public async Task PostAsync<T>(string resourceName, T data)
     {

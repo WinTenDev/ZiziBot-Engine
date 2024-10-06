@@ -15,15 +15,8 @@ public class GetWelcomeResponse
     public string Environment { get; set; }
 }
 
-public class GetWelcomeHandler : IRequestHandler<GetWelcomeRequest, ApiResponseBase<GetWelcomeResponse>>
+public class GetWelcomeHandler(IHostEnvironment hostEnvironment) : IRequestHandler<GetWelcomeRequest, ApiResponseBase<GetWelcomeResponse>>
 {
-    private readonly IHostEnvironment _hostEnvironment;
-
-    public GetWelcomeHandler(IHostEnvironment hostEnvironment)
-    {
-        _hostEnvironment = hostEnvironment;
-    }
-
     public async Task<ApiResponseBase<GetWelcomeResponse>> Handle(GetWelcomeRequest request, CancellationToken cancellationToken)
     {
         var response = new ApiResponseBase<GetWelcomeResponse>();
@@ -36,7 +29,7 @@ public class GetWelcomeHandler : IRequestHandler<GetWelcomeRequest, ApiResponseB
             AppVersion = VersionUtil.GetVersion(true),
             VersionNumber = VersionUtil.GetVersion(),
             BuildDate = VersionUtil.GetBuildDate().ToString("yyyy-MM-dd HH:mm:ss zzz"),
-            Environment = _hostEnvironment.EnvironmentName
+            Environment = hostEnvironment.EnvironmentName
         });
     }
 }

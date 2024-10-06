@@ -3,14 +3,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ZiziBot.Console.Middleware;
 
-public class CustomAuthenticationStateProvider : AuthenticationStateProvider
+public class CustomAuthenticationStateProvider(ProtectedLocalStorage protectedLocalStorage) : AuthenticationStateProvider
 {
-    private readonly ProtectedLocalStorage _protectedLocalStorage;
-
-    public CustomAuthenticationStateProvider(ProtectedLocalStorage protectedLocalStorage)
-    {
-        _protectedLocalStorage = protectedLocalStorage;
-    }
+    private readonly ProtectedLocalStorage _protectedLocalStorage = protectedLocalStorage;
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {

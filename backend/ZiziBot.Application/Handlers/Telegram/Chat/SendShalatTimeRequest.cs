@@ -11,19 +11,18 @@ public class SendShalatTimeRequest : IRequest<bool>
 
 public class SendShalatTimeHandler(
     ILogger<SendShalatTimeHandler> logger,
-    AppSettingRepository appSettingRepository,
-    FathimahApiService fathimahApiService,
-    ChatSettingRepository chatSettingRepository
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IRequestHandler<SendShalatTimeRequest, bool>
 {
     public async Task<bool> Handle(SendShalatTimeRequest request, CancellationToken cancellationToken)
     {
-        var botMain = await appSettingRepository.GetBotMain();
+        var botMain = await dataFacade.AppSetting.GetBotMain();
         var botClient = new TelegramBotClient(botMain.Token);
 
         const string defaultMessage = "Telah masuk waktu <b>{Shalat}</b> untuk wilayah <b>{City}</b> dan sekitarnya.";
 
-        var cityList = await chatSettingRepository.GetShalatCity(request.ChatId);
+        var cityList = await dataFacade.ChatSetting.GetShalatCity(request.ChatId);
 
         if (cityList.IsEmpty())
         {
@@ -37,12 +36,13 @@ public class SendShalatTimeHandler(
         {
             try
             {
-                var currentShalat = await fathimahApiService.GetCurrentShalatTime(cityEntity.CityId);
+                var currentShalat = await serviceFacade.FathimahApiService.GetCurrentShalatTime(cityEntity.CityId);
 
                 if (currentShalat?.IsNull() ?? false)
                 {
                     logger.LogDebug("No match Shalat time for city: '{CityName}' at '{CurrentTime}'",
                         cityEntity.CityName, DateTime.UtcNow.AddHours(Env.DEFAULT_TIMEZONE).ToString("HH:mm"));
+
                     continue;
                 }
 

@@ -6,22 +6,20 @@ using MoreLinq;
 namespace ZiziBot.Application.Handlers.Telegram.Chat;
 
 public class GetShalatTimeBotRequest : BotRequestBase
-{
-}
+{ }
 
 public class GetShalatTimeHandler(
     ILogger<GetShalatTimeHandler> logger,
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext,
-    FathimahApiService fathimahApiService
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IRequestHandler<GetShalatTimeBotRequest, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(GetShalatTimeBotRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Get Shalat Time list for ChatId: {ChatId}", request.ChatId);
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var cityList = await mongoDbContext.BangHasan_ShalatCity
+        var cityList = await dataFacade.MongoDb.BangHasan_ShalatCity
             .Where(entity => entity.ChatId == request.ChatIdentifier)
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .OrderBy(entity => entity.CityName)
@@ -41,8 +39,10 @@ public class GetShalatTimeHandler(
                 htmlMessage.Code(city.CityId.ToString()).Text(" - ").Text(city.CityName).Br()
                     .TextBr("====================================");
 
-                var shalatTime = await fathimahApiService.GetShalatTime(city.CityId, true);
-                shalatTime.Schedule?.ShalatDict?.ForEach(shalat => { htmlMessage.Bold(shalat.Key).Text(" : ").Text(shalat.Value).Br(); });
+                var shalatTime = await serviceFacade.FathimahApiService.GetShalatTime(city.CityId, true);
+                shalatTime.Schedule?.ShalatDict?.ForEach(shalat => {
+                    htmlMessage.Bold(shalat.Key).Text(" : ").Text(shalat.Value).Br();
+                });
 
                 htmlMessage.Br();
             }
@@ -52,6 +52,6 @@ public class GetShalatTimeHandler(
             htmlMessage.BoldBr("Belum ada Kota yg ditambahkan untuk Obrolan ini.");
         }
 
-        return await telegramService.SendMessageText(htmlMessage);
+        return await serviceFacade.TelegramService.SendMessageText(htmlMessage);
     }
 }

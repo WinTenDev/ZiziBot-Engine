@@ -8,33 +8,28 @@ public class AddSudoBotRequestModel : BotRequestBase
 }
 
 [UsedImplicitly]
-public class AddSudoRequestHandler : IRequestHandler<AddSudoBotRequestModel, BotResponseBase>
+public class AddSudoRequestHandler(
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+) : IRequestHandler<AddSudoBotRequestModel, BotResponseBase>
 {
-    private readonly TelegramService _telegramService;
-    private readonly SudoService _sudoService;
-
-    public AddSudoRequestHandler(TelegramService telegramService, MongoDbContextBase mongoDbContext,
-        SudoService sudoService)
-    {
-        _telegramService = telegramService;
-        _sudoService = sudoService;
-    }
-
     public async Task<BotResponseBase> Handle(AddSudoBotRequestModel request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        await _telegramService.SendMessageText("Adding sudo user...");
+        await serviceFacade.TelegramService.SendMessageText("Adding sudo user...");
 
-        var serviceResult = await _sudoService.SaveSudo(new SudoerEntity() {
-            UserId = request.CustomUserId == 0 ? request.UserId : request.CustomUserId,
+        var serviceResult = await serviceFacade.SudoService.SaveSudo(new SudoerEntity() {
+            UserId = request.CustomUserId == 0 ?
+                request.UserId :
+                request.CustomUserId,
             PromotedBy = request.UserId,
             PromotedFrom = request.ChatIdentifier,
             Status = (int)EventStatus.Complete
         });
 
-        await _telegramService.EditMessageText(serviceResult.Message);
+        await serviceFacade.TelegramService.EditMessageText(serviceResult.Message);
 
-        return _telegramService.Complete();
+        return serviceFacade.TelegramService.Complete();
     }
 }

@@ -6,7 +6,7 @@ using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.DataSource.MongoDb;
 
-public class MongoDbContextBase : MongoDbContext
+public class MongoDbContextBase(string connectionStr) : MongoDbContext(MongoDbConnection.FromConnectionString(connectionStr))
 {
     public MongoDbSet<AppSettingsEntity> AppSettings { get; set; }
     public MongoDbSet<BotSettingsEntity> BotSettings { get; set; }
@@ -56,10 +56,6 @@ public class MongoDbContextBase : MongoDbContext
 
     public MongoDbSet<JadwalSholatOrg_CityEntity> JadwalSholatOrg_City { get; set; }
     public MongoDbSet<JadwalSholatOrg_ScheduleEntity> JadwalSholatOrg_Schedule { get; set; }
-
-    public MongoDbContextBase(string connectionStr) : base(MongoDbConnection.FromConnectionString(connectionStr))
-    {
-    }
 
     public override void SaveChanges()
     {

@@ -6,8 +6,7 @@ namespace ZiziBot.Application.Handlers.Telegram.Basic;
 
 public class InsertChatActivityHandler<TRequest, TResponse>(
     ILogger<InsertChatActivityHandler<TRequest, TResponse>> logger,
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext
+    DataFacade dataFacade
 ) : IRequestPostProcessor<TRequest, TResponse>
     where TRequest : BotRequestBase, IRequest<TResponse>
     where TResponse : BotResponseBase
@@ -19,7 +18,7 @@ public class InsertChatActivityHandler<TRequest, TResponse>(
         if (request.Source != ResponseSource.Bot)
             return;
 
-        mongoDbContext.ChatActivity.Add(new ChatActivityEntity {
+        dataFacade.MongoDb.ChatActivity.Add(new ChatActivityEntity {
             MessageId = request.MessageId,
             ChatId = request.ChatIdentifier,
             UserId = request.UserId,
@@ -31,7 +30,7 @@ public class InsertChatActivityHandler<TRequest, TResponse>(
             TransactionId = request.TransactionId,
         });
 
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Insert Chat Activity for ChatId: {ChatId} is done", request.ChatId);
     }

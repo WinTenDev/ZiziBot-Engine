@@ -4,6 +4,7 @@ using MongoFramework.Linq;
 using ZiziBot.Contracts.Dtos.Entity;
 using ZiziBot.DataSource.MongoDb;
 using ZiziBot.DataSource.MongoDb.Entities;
+using ZiziBot.Types.Types;
 
 namespace ZiziBot.DataSource.Repository;
 
@@ -217,5 +218,86 @@ public class ChatSettingRepository(
         logger.LogDebug("Last Webhook Message for Better Edit: {MessageId}", lastWebhookHistory.MessageId);
 
         return lastWebhookHistory.MessageId;
+    }
+
+    public async Task SaveGlobalBan(GlobalBanDto dto)
+    {
+        var globalBan = await mongoDbContext.GlobalBan
+            .Where(entity => entity.UserId == dto.UserId)
+            .Where(entity => entity.Status == (int)EventStatus.Complete)
+            .FirstOrDefaultAsync();
+
+        if (globalBan == null)
+        {
+            mongoDbContext.GlobalBan.Add(new GlobalBanEntity() {
+                UserId = dto.UserId,
+                ChatId = dto.ChatId,
+                Reason = dto.Reason,
+                Status = (int)EventStatus.Complete,
+            });
+        }
+        else
+        {
+            globalBan.UserId = dto.UserId;
+            globalBan.Reason = dto.Reason;
+        }
+
+        await mongoDbContext.SaveChangesAsync();
+    }
+
+    public async Task<string> SaveUserActivity(BotUserDto request)
+    {
+        var trackingMessage = HtmlMessage.Empty;
+        var botUser = await mongoDbContext.BotUser
+            .Where(entity => entity.UserId == request.UserId)
+            .Where(entity => entity.Status == (int)EventStatus.Complete)
+            .FirstOrDefaultAsync();
+
+        if (botUser == null)
+        {
+            logger.LogDebug("Adding User with UserId: {UserId}", request.UserId);
+
+            mongoDbContext.BotUser.Add(new BotUserEntity() {
+                UserId = request.UserId,
+                Username = request.Username,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                LanguageCode = request.LanguageCode,
+                Status = (int)EventStatus.Complete,
+                TransactionId = request.TransactionId
+            });
+        }
+        else
+        {
+            logger.LogDebug("Updating User with UserId: {UserId}", request.UserId);
+
+            if (botUser.FirstName != request.FirstName)
+                trackingMessage.TextBr("Mengubah nama depannya");
+
+            if (botUser.LastName != request.LastName)
+                trackingMessage.TextBr("Mengubah nama belakangnya");
+
+            if (botUser.Username != request.Username)
+                trackingMessage.TextBr("Mengubah username-nya");
+
+            botUser.UserId = request.UserId;
+            botUser.Username = request.Username;
+            botUser.FirstName = request.FirstName;
+            botUser.LastName = request.LastName;
+            botUser.LanguageCode = request.LanguageCode;
+            botUser.Status = (int)EventStatus.Complete;
+            botUser.TransactionId = request.TransactionId;
+        }
+
+        await mongoDbContext.SaveChangesAsync();
+
+        if (trackingMessage.IsEmpty)
+            return string.Empty;
+
+        var message = HtmlMessage.Empty
+            .Bold("Pengguna: ").User(request.User).Br()
+            .Append(trackingMessage);
+
+        return message.ToString();
     }
 }

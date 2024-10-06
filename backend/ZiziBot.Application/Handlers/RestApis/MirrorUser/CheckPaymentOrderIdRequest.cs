@@ -5,29 +5,25 @@ public class CheckPaymentOrderIdRequest : ApiRequestBase<TrakteerParsedDto>
     public string OrderId { get; set; }
 }
 
-public class CheckPaymentOrderIdHandler : IApiRequestHandler<CheckPaymentOrderIdRequest, TrakteerParsedDto>
+public class CheckPaymentOrderIdHandler(
+    ServiceFacade serviceFacade
+) : IApiRequestHandler<CheckPaymentOrderIdRequest, TrakteerParsedDto>
 {
-    private readonly MirrorPaymentService _mirrorPaymentService;
     private readonly ApiResponseBase<TrakteerParsedDto> _response = new();
-
-    public CheckPaymentOrderIdHandler(MirrorPaymentService mirrorPaymentService)
-    {
-        _mirrorPaymentService = mirrorPaymentService;
-    }
 
     public async Task<ApiResponseBase<TrakteerParsedDto>> Handle(CheckPaymentOrderIdRequest request, CancellationToken cancellationToken)
     {
-        var parsedTrakteer = await _mirrorPaymentService.ParseSaweriaWeb(request.OrderId);
+        var parsedTrakteer = await serviceFacade.MirrorPaymentService.ParseSaweriaWeb(request.OrderId);
 
         if (parsedTrakteer.IsValid)
         {
             return _response.Success("Get OrderId succeed", parsedTrakteer);
         }
 
-        var parsedSaweria = await _mirrorPaymentService.ParseSaweriaWeb(request.OrderId);
+        var parsedSaweria = await serviceFacade.MirrorPaymentService.ParseSaweriaWeb(request.OrderId);
 
-        return parsedSaweria.IsValid
-            ? _response.Success("Get OrderId succeed", parsedSaweria)
-            : _response.BadRequest("OrderId not found");
+        return parsedSaweria.IsValid ?
+            _response.Success("Get OrderId succeed", parsedSaweria) :
+            _response.BadRequest("OrderId not found");
     }
 }

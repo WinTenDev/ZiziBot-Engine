@@ -4,19 +4,12 @@ using Xunit;
 
 namespace ZiziBot.Tests.Services;
 
-public class UupDumpServiceTests
+public class UupDumpServiceTests(UupDumpService uupDumpService)
 {
-    private readonly UupDumpService _uupDumpService;
-
     public static readonly object[][] ShalatCity = {
         new object[] { DateOnly.FromDateTime(DateTime.Now), 712 },
         new object[] { new DateOnly(2017, 3, 1), 712 },
     };
-
-    public UupDumpServiceTests(UupDumpService uupDumpService)
-    {
-        _uupDumpService = uupDumpService;
-    }
 
     [SkippableTheory(typeof(FlurlHttpException), typeof(FlurlParsingException))]
     [InlineData("")]
@@ -24,7 +17,7 @@ public class UupDumpServiceTests
     [InlineData("22000")]
     public async Task GetBuildTest(string search)
     {
-        var updates = await _uupDumpService.GetUpdatesAsync(search);
+        var updates = await uupDumpService.GetUpdatesAsync(search);
 
         updates.Should().NotBeNull();
     }

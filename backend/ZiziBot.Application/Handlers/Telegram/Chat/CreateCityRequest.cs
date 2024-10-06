@@ -10,17 +10,16 @@ public class AddCityBotRequest : BotRequestBase
 }
 
 internal class AddCityHandler(
-    TelegramService telegramService,
-    MongoDbContextBase mongoDbContext,
-    FathimahApiService fathimahApiService
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IRequestHandler<AddCityBotRequest, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(AddCityBotRequest request, CancellationToken cancellationToken)
     {
         var htmlMessage = HtmlMessage.Empty;
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var cityInfoAll = await fathimahApiService.GetAllCityAsync();
+        var cityInfoAll = await serviceFacade.FathimahApiService.GetAllCityAsync();
         var cityInfo = cityInfoAll.Cities
             .WhereIf(request.CityId > 0, kota => kota.Id == request.CityId)
             .WhereIf(request.CityName.IsNotNullOrEmpty(), kota => kota.Lokasi.Like(request.CityName))
@@ -28,10 +27,10 @@ internal class AddCityHandler(
 
         if (cityInfo == null)
         {
-            return await telegramService.SendMessageText("Kota tidak ditemukan");
+            return await serviceFacade.TelegramService.SendMessageText("Kota tidak ditemukan");
         }
 
-        var city = await mongoDbContext.BangHasan_ShalatCity
+        var city = await dataFacade.MongoDb.BangHasan_ShalatCity
             .Where(entity => entity.ChatId == request.ChatIdentifier)
             .Where(entity => entity.CityId == cityInfo.Id)
             .Where(entity => entity.Status == (int)EventStatus.Complete)
@@ -49,7 +48,7 @@ internal class AddCityHandler(
         }
         else
         {
-            mongoDbContext.BangHasan_ShalatCity.Add(new BangHasan_ShalatCityEntity() {
+            dataFacade.MongoDb.BangHasan_ShalatCity.Add(new BangHasan_ShalatCityEntity() {
                 ChatId = request.ChatIdentifier,
                 UserId = request.UserId,
                 CityId = cityInfo.Id,
@@ -57,13 +56,13 @@ internal class AddCityHandler(
                 Status = (int)EventStatus.Complete
             });
 
-            await mongoDbContext.SaveChangesAsync(cancellationToken);
+            await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
             htmlMessage.Text("Kota berhasil disimpan")
                 .Br()
                 .Append(cityMsg);
         }
 
-        return await telegramService.SendMessageText(htmlMessage.ToString());
+        return await serviceFacade.TelegramService.SendMessageText(htmlMessage.ToString());
     }
 }

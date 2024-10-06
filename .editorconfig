@@ -10,6 +10,8 @@ end_of_line = lf
 # ReSharper properties
 resharper_csharp_empty_block_style = together
 resharper_html_pi_attribute_style = first_attribute_on_single_line
+resharper_wrap_before_primary_constructor_declaration_rpar = true
+resharper_wrap_primary_constructor_parameters_style = chop_always
 
 [*.cs]
 indent_size = 4

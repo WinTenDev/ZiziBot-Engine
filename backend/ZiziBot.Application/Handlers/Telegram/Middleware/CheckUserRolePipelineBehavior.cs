@@ -4,8 +4,8 @@ namespace ZiziBot.Application.Handlers.Telegram.Middleware;
 
 public class CheckUserRolePipelineBehavior<TRequest, TResponse>(
     ILogger<CheckUserRolePipelineBehavior<TRequest, TResponse>> logger,
-    TelegramService telegramService,
-    SudoService sudoService
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : BotRequestBase, IRequest<TResponse>
     where TResponse : BotResponseBase, new()
@@ -14,9 +14,9 @@ public class CheckUserRolePipelineBehavior<TRequest, TResponse>(
     {
         logger.LogDebug("Checking Role {Name} for UserId: {UserId} in ChatId: {ChatId}", typeof(TRequest), request.UserId, request.ChatId);
 
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var isRoleMeet = await telegramService.ValidateRole();
+        var isRoleMeet = await serviceFacade.TelegramService.ValidateRole();
 
         if (request.MinimumRole > RoleLevel.None)
             logger.LogWarning("The minimum role for {Name} for UserId: {UserId} in ChatId: {ChatId} should have role minimum {Role}? {Result}",

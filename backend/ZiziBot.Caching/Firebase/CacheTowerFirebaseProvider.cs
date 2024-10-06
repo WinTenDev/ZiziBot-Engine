@@ -5,19 +5,12 @@ using Google.Apis.Auth.OAuth2;
 
 namespace ZiziBot.Caching.Firebase;
 
-public class CacheTowerFirebaseProvider : ICacheLayer
+public class CacheTowerFirebaseProvider(FirebaseCacheOptions cacheOptions) : ICacheLayer
 {
-    private readonly FirebaseCacheOptions _cacheOptions;
-
-    public CacheTowerFirebaseProvider(FirebaseCacheOptions cacheOptions)
-    {
-        _cacheOptions = cacheOptions;
-    }
-
     public ValueTask FlushAsync()
     {
         GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .DeleteAsync();
 
         return ValueTask.CompletedTask;
@@ -26,7 +19,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
     public ValueTask CleanupAsync()
     {
         GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .DeleteAsync();
 
         return ValueTask.CompletedTask;
@@ -36,7 +29,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
     public async ValueTask EvictAsync(string cacheKey)
     {
         await GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .Child(cacheKey)
             .DeleteAsync();
     }
@@ -46,7 +39,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
         var cacheEntry = default(CacheEntry<T>?);
 
         var data = await GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .Child(cacheKey)
             .OnceAsync<FirebaseCacheEntry<T>>();
 
@@ -61,7 +54,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
     public async ValueTask SetAsync<T>(string cacheKey, CacheEntry<T> cacheEntry)
     {
         await GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .Child(cacheKey)
             .PutAsync(
                 new FirebaseCacheEntry<T?>()
@@ -76,7 +69,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
     public async ValueTask<bool> IsAvailableAsync(string cacheKey)
     {
         var obj = await GetClient()
-            .Child(_cacheOptions.RootDir)
+            .Child(cacheOptions.RootDir)
             .Child(cacheKey)
             .OnceAsync<object>();
 
@@ -86,7 +79,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
     private FirebaseClient GetClient()
     {
         var client = new FirebaseClient(
-            baseUrl: _cacheOptions.ProjectUrl,
+            baseUrl: cacheOptions.ProjectUrl,
             options: new FirebaseOptions
             {
                 AuthTokenAsyncFactory = GetAccessToken,
@@ -99,7 +92,7 @@ public class CacheTowerFirebaseProvider : ICacheLayer
 
     private async Task<string> GetAccessToken()
     {
-        var credential = GoogleCredential.FromJson(_cacheOptions.ServiceAccountJson)
+        var credential = GoogleCredential.FromJson(cacheOptions.ServiceAccountJson)
             .CreateScoped("https://www.googleapis.com/auth/firebase.database", "https://www.googleapis.com/auth/userinfo.email");
 
         var accessToken = await credential.UnderlyingCredential.GetAccessTokenForRequestAsync();

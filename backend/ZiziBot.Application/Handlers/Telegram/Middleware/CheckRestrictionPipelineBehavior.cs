@@ -1,6 +1,4 @@
-﻿using ZiziBot.Application.Facades;
-
-namespace ZiziBot.Application.Handlers.Telegram.Middleware;
+﻿namespace ZiziBot.Application.Handlers.Telegram.Middleware;
 
 public class CheckRestrictionPipelineBehavior<TRequest, TResponse>(
     ServiceFacade serviceFacade,

@@ -6,19 +6,12 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class MirrorController : CommandController
+public class MirrorController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public MirrorController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("mp")]
     public async Task SaveMirrorPayment(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new SavePaymentBotRequestModel()
+        await mediatorService.EnqueueAsync(new SavePaymentBotRequestModel()
         {
             BotToken = data.Options.Token,
             ReplyMessage = true,
@@ -37,7 +30,7 @@ public class MirrorController : CommandController
     [Command("sp")]
     public async Task SubmitMirrorPayment(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new SubmitPaymentBotRequest()
+        await mediatorService.EnqueueAsync(new SubmitPaymentBotRequest()
         {
             BotToken = data.Options.Token,
             ReplyMessage = true,
@@ -55,7 +48,7 @@ public class MirrorController : CommandController
     [Command("ms")]
     public async Task MirrorSubscription(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetMirrorSubscriptionBotRequest()
+        await mediatorService.EnqueueAsync(new GetMirrorSubscriptionBotRequest()
         {
             BotToken = data.Options.Token,
             ReplyMessage = true,

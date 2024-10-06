@@ -52,3 +52,16 @@ public class ApiResponseBase<TResult>
         return this;
     }
 }
+
+public static class ApiResponseBase
+{
+    public static ApiResponseBase<TResult> ReturnSuccess<TResult>(string message, TResult? result = default)
+    {
+        return new ApiResponseBase<TResult>().Success(message, result);
+    }
+
+    public static ApiResponseBase<TResult> ReturnBadRequest<TResult>(string message, TResult? result = default)
+    {
+        return new ApiResponseBase<TResult>().BadRequest(message, result);
+    }
+}

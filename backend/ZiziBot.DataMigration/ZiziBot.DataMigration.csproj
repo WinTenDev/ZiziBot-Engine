@@ -17,9 +17,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MongoDB.Driver" Version="2.28.0"/>
-        <PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.1.0"/>
-        <PackageReference Include="Scrutor" Version="4.2.2"/>
+        <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
+        <PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.1.1" />
+        <PackageReference Include="Scrutor" Version="5.0.1" />
     </ItemGroup>
 
 </Project>

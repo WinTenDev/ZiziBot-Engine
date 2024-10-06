@@ -1,33 +1,30 @@
 namespace ZiziBot.Application.Handlers.Telegram.Text;
 
 public class OcrBotRequest : BotRequestBase
-{
-}
+{ }
 
 public class OcrRequestHandler(
-    TelegramService telegramService,
-    OptiicDevService optiicDevService,
-    OcrSpaceService ocrSpaceService
+    ServiceFacade serviceFacade
 ) : IBotRequestHandler<OcrBotRequest>
 {
     public async Task<BotResponseBase> Handle(OcrBotRequest request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        await telegramService.SendMessageText("🔎 Sedang melakukan OCR");
+        await serviceFacade.TelegramService.SendMessageText("🔎 Sedang melakukan OCR");
 
         try
         {
-            var localFile = await telegramService.DownloadFileAsync("ocr/");
+            var localFile = await serviceFacade.TelegramService.DownloadFileAsync("ocr/");
             // var ocrResult = await _optiicDevService.ScanImageAsync(localFile);
-            var result = await ocrSpaceService.ParseImage(localFile);
+            var result = await serviceFacade.OcrSpaceService.ParseImage(localFile);
 
             if (result.IsNullOrEmpty())
             {
-                return await telegramService.EditMessageText("Sepertinya tidak ada teks di sana");
+                return await serviceFacade.TelegramService.EditMessageText("Sepertinya tidak ada teks di sana");
             }
 
-            return await telegramService.EditMessageText(result);
+            return await serviceFacade.TelegramService.EditMessageText(result);
         }
         catch (Exception exception)
         {
@@ -35,7 +32,7 @@ public class OcrRequestHandler(
                 .Bold("Terjadi kesalahan ketika menjalankan OCR").Br()
                 .Bold("Error: ").Text(exception.Message.Split(":").FirstOrDefault());
 
-            return await telegramService.EditMessageText(htmlMessage.ToString());
+            return await serviceFacade.TelegramService.EditMessageText(htmlMessage.ToString());
         }
     }
 }

@@ -11,8 +11,11 @@ public static class SerializationUtil
         return JsonConvert.SerializeObject(source, indented ? Formatting.Indented : Formatting.None);
     }
 
-    public static T? ToObject<T>(this string source)
+    public static T? ToObject<T>(this string? source)
     {
+        if (string.IsNullOrEmpty(source))
+            return default;
+
         return JsonConvert.DeserializeObject<T>(source);
     }
 

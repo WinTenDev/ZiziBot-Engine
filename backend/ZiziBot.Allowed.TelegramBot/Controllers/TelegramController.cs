@@ -6,13 +6,8 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [Route("telegram")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class TelegramController : TelegramControllerBase
-{
-	public TelegramController(
-		IServiceProvider serviceProvider,
-		ControllersCollection controllersCollection,
-		ClientsCollection clientsCollection
-	) : base(serviceProvider, controllersCollection, clientsCollection)
-	{
-	}
-}
+public class TelegramController(
+    IServiceProvider serviceProvider,
+    ControllersCollection controllersCollection,
+    ClientsCollection clientsCollection)
+    : TelegramControllerBase(serviceProvider, controllersCollection, clientsCollection);

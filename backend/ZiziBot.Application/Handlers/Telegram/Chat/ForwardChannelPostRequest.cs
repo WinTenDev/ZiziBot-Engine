@@ -10,27 +10,18 @@ using ZiziBot.DataSource.MongoDb.Entities;
 namespace ZiziBot.Application.Handlers.Telegram.Chat;
 
 public class ForwardChannelPostRequest : BotRequestBase
+{ }
+
+public class ForwardChannelPostHandler(
+    ILogger<ForwardChannelPostHandler> logger,
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+) : IBotRequestHandler<ForwardChannelPostRequest>
 {
-}
-
-public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRequest>
-{
-    private readonly ILogger<ForwardChannelPostHandler> _logger;
-    private readonly TelegramService _telegramService;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public ForwardChannelPostHandler(ILogger<ForwardChannelPostHandler> logger, TelegramService telegramService,
-        MongoDbContextBase mongoDbContext)
-    {
-        _logger = logger;
-        _telegramService = telegramService;
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<BotResponseBase> Handle(ForwardChannelPostRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
-        _logger.LogInformation("Prepare forwarding channel post..");
+        serviceFacade.TelegramService.SetupResponse(request);
+        logger.LogInformation("Prepare forwarding channel post..");
         var channel = request.ChannelPostAny;
 
         var channelId = channel?.Chat.Id;
@@ -39,7 +30,7 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
         var messageLink = channel.GetMessageLink();
         var fileUniqueId = channel.GetFileUniqueId();
 
-        var channelMaps = await _mongoDbContext.ChannelMap
+        var channelMaps = await dataFacade.MongoDb.ChannelMap
             .Where(entity => entity.ChannelId == channelId)
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .ToListAsync(cancellationToken: cancellationToken);
@@ -51,7 +42,7 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
         });
 
         await channelMaps.ForEachAsync(async channelMap => {
-            var channelPost = await _mongoDbContext.ChannelPost.AsNoTracking()
+            var channelPost = await dataFacade.MongoDb.ChannelPost.AsNoTracking()
                 .Where(x => x.DestinationChatId == channelMap.ChatId)
                 .Where(x => x.DestinationThreadId == channelMap.ThreadId)
                 .Where(x => x.SourceMessageId == channel!.MessageId)
@@ -62,31 +53,31 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
             {
                 if (request.ChannelPost != null)
                 {
-                    _logger.LogDebug(
+                    logger.LogDebug(
                         "Sending channel post from ChannelId: {ChannelId} to ChatId: {ChatId}, ThreadId: {ThreadId} ..",
                         channelMap.ChannelId, channelMap.ChatId, channelMap.ThreadId);
 
                     var send = channel.Type switch {
-                        MessageType.Text => await _telegramService.SendMessageText(
+                        MessageType.Text => await serviceFacade.TelegramService.SendMessageText(
                             text: textCaption,
                             threadId: channelMap.ThreadId.Convert<int>(),
                             replyMarkup: replyMarkup,
                             chatId: channelMap.ChatId),
-                        MessageType.Document => await _telegramService.SendMediaAsync(
+                        MessageType.Document => await serviceFacade.TelegramService.SendMediaAsync(
                             fileId: fileId,
                             caption: textCaption,
                             mediaType: CommonMediaType.Document,
                             threadId: channelMap.ThreadId.Convert<int>(),
                             replyMarkup: replyMarkup,
                             customChatId: channelMap.ChatId),
-                        MessageType.Photo => await _telegramService.SendMediaAsync(
+                        MessageType.Photo => await serviceFacade.TelegramService.SendMediaAsync(
                             fileId: fileId,
                             caption: textCaption,
                             mediaType: CommonMediaType.Photo,
                             threadId: channelMap.ThreadId.Convert<int>(),
                             replyMarkup: replyMarkup,
                             customChatId: channelMap.ChatId),
-                        MessageType.Video => await _telegramService.SendMediaAsync(
+                        MessageType.Video => await serviceFacade.TelegramService.SendMediaAsync(
                             fileId: fileId,
                             caption: textCaption,
                             mediaType: CommonMediaType.Video,
@@ -96,7 +87,7 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
                         _ => throw new ArgumentOutOfRangeException()
                     };
 
-                    _mongoDbContext.ChannelPost.Add(new ChannelPostEntity() {
+                    dataFacade.MongoDb.ChannelPost.Add(new ChannelPostEntity() {
                         SourceChannelId = channelMap.ChannelId,
                         SourceMessageId = channel.MessageId,
                         DestinationChatId = channelMap.ChatId,
@@ -114,20 +105,20 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
                 {
                     if (channelPost == null)
                     {
-                        _logger.LogDebug(
+                        logger.LogDebug(
                             "No channel post found from ChannelId: {ChannelId} for ChatId: {ChatId}, ThreadId: {ThreadId} ..",
                             channelMap.ChannelId, channelMap.ChatId, channelMap.ThreadId);
 
                         return;
                     }
 
-                    _logger.LogDebug(
+                    logger.LogDebug(
                         "Updating channel post to ChannelId: {ChannelId} to ChatId: {ChatId}, ThreadId: {ThreadId} ..",
                         channelMap.ChannelId, channelMap.ChatId, channelMap.ThreadId);
 
                     if (channel.Type == MessageType.Text)
                     {
-                        var edit = await _telegramService.Bot.EditMessageTextAsync(
+                        var edit = await serviceFacade.TelegramService.Bot.EditMessageTextAsync(
                             chatId: channelMap.ChatId,
                             messageId: channelPost.DestinationMessageId.Convert<int>(),
                             text: textCaption,
@@ -143,7 +134,7 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
                     {
                         if (channelPost.Text != textCaption)
                         {
-                            await _telegramService.Bot.EditMessageCaptionAsync(
+                            await serviceFacade.TelegramService.Bot.EditMessageCaptionAsync(
                                 chatId: channelMap.ChatId,
                                 messageId: channelPost.DestinationMessageId.Convert<int>(),
                                 caption: textCaption,
@@ -164,7 +155,7 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
                                 _ => throw new ArgumentOutOfRangeException(null)
                             };
 
-                            await _telegramService.Bot.EditMessageMediaAsync(
+                            await serviceFacade.TelegramService.Bot.EditMessageMediaAsync(
                                 chatId: channelMap.ChatId,
                                 messageId: channelPost.DestinationMessageId.Convert<int>(),
                                 media: media,
@@ -182,13 +173,13 @@ public class ForwardChannelPostHandler : IBotRequestHandler<ForwardChannelPostRe
             {
                 if (exception.Message.IsIgnorable())
                 {
-                    _logger.LogWarning(exception, "Error when forwarding channel post");
+                    logger.LogWarning(exception, "Error when forwarding channel post");
                 }
             }
         });
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-        return _telegramService.Complete();
+        return serviceFacade.TelegramService.Complete();
     }
 }

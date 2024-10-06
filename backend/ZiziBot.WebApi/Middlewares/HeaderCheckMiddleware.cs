@@ -4,22 +4,15 @@ using Microsoft.Extensions.Logging;
 
 namespace ZiziBot.WebApi.Middlewares;
 
-public class HeaderCheckMiddleware : IMiddleware
+public class HeaderCheckMiddleware(ILogger<HeaderCheckMiddleware> logger) : IMiddleware
 {
-    private readonly ILogger<HeaderCheckMiddleware> _logger;
-
-    public HeaderCheckMiddleware(ILogger<HeaderCheckMiddleware> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        _logger.LogTrace("Request Context: {Context}", context.Request.Path);
+        logger.LogTrace("Request Context: {Context}", context.Request.Path);
 
         if (!(context.Request.Path.Value?.StartsWith("/api") ?? false))
         {
-            _logger.LogTrace("Url is not api");
+            logger.LogTrace("Url is not api");
             await next(context);
             return;
         }
@@ -32,7 +25,7 @@ public class HeaderCheckMiddleware : IMiddleware
 
         if (ignorePaths.Any(s => context.Request.Path.Value.StartsWith(s)))
         {
-            _logger.LogDebug("Url path is ignored from Header verification. Url: {Url}", context.Request.Path.Value);
+            logger.LogDebug("Url path is ignored from Header verification. Url: {Url}", context.Request.Path.Value);
             await next(context);
             return;
         }

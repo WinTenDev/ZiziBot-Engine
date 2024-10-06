@@ -7,19 +7,12 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class RssController : CommandController
+public class RssController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public RssController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("rss")]
     public async Task AddRss(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new AddRssRequest()
+        await mediatorService.EnqueueAsync(new AddRssRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

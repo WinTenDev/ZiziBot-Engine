@@ -1,4 +1,3 @@
-using Hangfire;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using MongoFramework.Linq;
@@ -18,11 +17,9 @@ public class FetchRssRequest : IRequest<bool>
 
 public class FetchRssHandler(
     ILogger<FetchRssHandler> logger,
-    IRecurringJobManager recurringJob,
-    MongoDbContextBase mongoDbContext,
-    AppSettingRepository appSettingRepository
-)
-    : IRequestHandler<FetchRssRequest, bool>
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+) : IRequestHandler<FetchRssRequest, bool>
 {
     public async Task<bool> Handle(FetchRssRequest request, CancellationToken cancellationToken)
     {
@@ -38,10 +35,11 @@ public class FetchRssHandler(
             {
                 logger.LogInformation("No article found in ChatId: {ChatId} for RSS Url: {Url}", request.ChatId,
                     request.RssUrl);
+
                 return false;
             }
 
-            var latestHistory = await mongoDbContext.RssHistory.AsNoTracking()
+            var latestHistory = await dataFacade.MongoDb.RssHistory.AsNoTracking()
                 .Where(entity => entity.ChatId == request.ChatId)
                 .Where(entity => entity.ThreadId == request.ThreadId)
                 .Where(entity => entity.RssUrl == request.RssUrl)
@@ -52,10 +50,11 @@ public class FetchRssHandler(
             {
                 logger.LogDebug("No new article found in ChatId: {ChatId} for RSS Url: {Url}", request.ChatId,
                     request.RssUrl);
+
                 return false;
             }
 
-            var botSettings = await appSettingRepository.GetBotMain();
+            var botSettings = await dataFacade.AppSetting.GetBotMain();
 
             var botClient = new TelegramBotClient(botSettings.Token);
 
@@ -66,7 +65,7 @@ public class FetchRssHandler(
                 .Url(latestArticle.Link, latestArticle.Title.Trim()).Br();
 
             if (!request.RssUrl.IsGithubCommitsUrl() &&
-                await appSettingRepository.GetFlagValue(Flag.RSS_INCLUDE_CONTENT))
+                await dataFacade.AppSetting.GetFlagValue(Flag.RSS_INCLUDE_CONTENT))
                 messageText.Text(htmlContent.Truncate(2000));
 
             if (request.RssUrl.IsGithubReleaseUrl())
@@ -113,7 +112,7 @@ public class FetchRssHandler(
                 }
             }
 
-            mongoDbContext.RssHistory.Add(new RssHistoryEntity() {
+            dataFacade.MongoDb.RssHistory.Add(new RssHistoryEntity() {
                 ChatId = request.ChatId,
                 ThreadId = request.ThreadId,
                 RssUrl = request.RssUrl,
@@ -128,7 +127,7 @@ public class FetchRssHandler(
         {
             if (exception.IsRssBetterDisabled())
             {
-                var findRssSetting = await mongoDbContext.RssSetting
+                var findRssSetting = await dataFacade.MongoDb.RssSetting
                     .Where(entity => entity.ChatId == request.ChatId)
                     .Where(entity => entity.RssUrl == request.RssUrl)
                     .Where(entity => entity.Status == (int)EventStatus.Complete)
@@ -143,7 +142,7 @@ public class FetchRssHandler(
                     rssSetting.Status = (int)EventStatus.InProgress;
                     rssSetting.LastErrorMessage = exceptionMessage;
 
-                    recurringJob.RemoveIfExists(rssSetting.CronJobId);
+                    serviceFacade.RecurringJobManager.RemoveIfExists(rssSetting.CronJobId);
                 });
             }
             else
@@ -153,7 +152,7 @@ public class FetchRssHandler(
             }
         }
 
-        await mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return true;
     }

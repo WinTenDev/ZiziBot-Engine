@@ -11,32 +11,27 @@ public class RegisterRssJobUrlRequest : IRequest<bool>
     public string JobId { get; set; }
 }
 
-public class RegisterRssJobUrlHandler : IRequestHandler<RegisterRssJobUrlRequest, bool>
+public class RegisterRssJobUrlHandler(
+    ILogger<RegisterRssJobUrlHandler> logger,
+    ServiceFacade serviceFacade
+) : IRequestHandler<RegisterRssJobUrlRequest, bool>
 {
-    private readonly ILogger<RegisterRssJobUrlHandler> _logger;
-    private readonly IRecurringJobManager _recurringJobManager;
-
-    public RegisterRssJobUrlHandler(ILogger<RegisterRssJobUrlHandler> logger, IRecurringJobManager recurringJobManager)
-    {
-        _logger = logger;
-        _recurringJobManager = recurringJobManager;
-    }
-
     public async Task<bool> Handle(RegisterRssJobUrlRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Registering RSS Job. ChatId: {ChatId}, ThreadId: {ThreadId} RssUrl: {RssUrl}", request.ChatId, request.ThreadId, request.Url);
+        logger.LogDebug("Registering RSS Job. ChatId: {ChatId}, ThreadId: {ThreadId} RssUrl: {RssUrl}", request.ChatId, request.ThreadId, request.Url);
 
-        _recurringJobManager.RemoveIfExists(request.JobId);
-        _recurringJobManager.AddOrUpdate<MediatorService>(
+        serviceFacade.RecurringJobManager.RemoveIfExists(request.JobId);
+        serviceFacade.RecurringJobManager.AddOrUpdate<MediatorService>(
             recurringJobId: request.JobId,
-            methodCall: mediatorService => mediatorService.Send(new FetchRssRequest()
-            {
+            methodCall: mediatorService => mediatorService.Send(new FetchRssRequest() {
                 ChatId = request.ChatId,
                 ThreadId = request.ThreadId,
                 RssUrl = request.Url
             }),
-            queue: "rss",
+            queue: CronJobKey.Queue_Rss,
             cronExpression: TimeUtil.MinuteInterval(3));
+
+        await Task.Delay(1);
 
         return true;
     }

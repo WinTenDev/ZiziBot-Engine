@@ -4,15 +4,8 @@ using Microsoft.Extensions.Logging;
 
 namespace ZiziBot.WebApi.Middlewares;
 
-public class GlobalExceptionMiddleware : IMiddleware
+public class GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger) : IMiddleware
 {
-    private readonly ILogger<GlobalExceptionMiddleware> _logger;
-
-    public GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
@@ -21,7 +14,7 @@ public class GlobalExceptionMiddleware : IMiddleware
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Unhandled API Exception");
+            logger.LogError(exception, "Unhandled API Exception");
 
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             await context.Response.WriteAsJsonAsync(new ApiResponseBase<object>() {

@@ -6,20 +6,13 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class SettingsController : CommandController
+public class SettingsController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public SettingsController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("console")]
     [Command("settings")]
     public async Task GetSettingPanel(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new PrepareConsoleBotRequest()
+        await mediatorService.EnqueueAsync(new PrepareConsoleBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -37,7 +30,7 @@ public class SettingsController : CommandController
     [Command("wt")]
     public async Task SaveWelcome(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new SaveWelcomeMessageRequest()
+        await mediatorService.EnqueueAsync(new SaveWelcomeMessageRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -54,7 +47,7 @@ public class SettingsController : CommandController
     [Command("wm")]
     public async Task ShowWelcome(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new ShowWelcomeMessageRequest()
+        await mediatorService.EnqueueAsync(new ShowWelcomeMessageRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

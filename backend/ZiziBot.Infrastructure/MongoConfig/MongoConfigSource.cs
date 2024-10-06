@@ -2,14 +2,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace ZiziBot.Infrastructure.MongoConfig;
 
-public class MongoConfigSource : IConfigurationSource
+public class MongoConfigSource(string connectionString) : IConfigurationSource
 {
-    private readonly MongoDbContextBase _dbContext;
-
-    public MongoConfigSource(string connectionString)
-    {
-        _dbContext = new MongoDbContextBase(connectionString);
-    }
+    private readonly MongoDbContextBase _dbContext = new(connectionString);
 
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {

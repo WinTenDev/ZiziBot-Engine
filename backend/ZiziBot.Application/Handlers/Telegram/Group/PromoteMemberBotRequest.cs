@@ -5,35 +5,29 @@ public class PromoteMemberBotRequest : BotRequestBase
     public bool Promote { get; set; }
 }
 
-public class PromoteMemberHandler : IRequestHandler<PromoteMemberBotRequest, BotResponseBase>
+public class PromoteMemberHandler(
+    ServiceFacade serviceFacade
+) : IRequestHandler<PromoteMemberBotRequest, BotResponseBase>
 {
-    private readonly TelegramService _telegramService;
-
-    public PromoteMemberHandler(TelegramService telegramService)
-    {
-        _telegramService = telegramService;
-    }
-
     public async Task<BotResponseBase> Handle(PromoteMemberBotRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         if (request.Promote)
         {
+            if (await serviceFacade.TelegramService.CheckAdministration())
+                return await serviceFacade.TelegramService.SendMessageText("Pengguna sudah menjadi admin");
 
-            if (await _telegramService.CheckAdministration())
-                return await _telegramService.SendMessageText("Pengguna sudah menjadi admin");
-
-            await _telegramService.PromoteMember(request.UserId);
-            return await _telegramService.SendMessageText("Promote berhasil");
+            await serviceFacade.TelegramService.PromoteMember(request.UserId);
+            return await serviceFacade.TelegramService.SendMessageText("Promote berhasil");
         }
         else
         {
-            if (!await _telegramService.CheckAdministration())
-                return await _telegramService.SendMessageText("Pengguna sudah bukan lagi admin");
+            if (!await serviceFacade.TelegramService.CheckAdministration())
+                return await serviceFacade.TelegramService.SendMessageText("Pengguna sudah bukan lagi admin");
 
-            await _telegramService.DemoteMember(request.UserId);
-            return await _telegramService.SendMessageText("Demote berhasil");
+            await serviceFacade.TelegramService.DemoteMember(request.UserId);
+            return await serviceFacade.TelegramService.SendMessageText("Demote berhasil");
         }
     }
 }

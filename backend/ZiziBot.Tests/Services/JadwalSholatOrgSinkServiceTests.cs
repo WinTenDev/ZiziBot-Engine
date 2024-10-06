@@ -6,41 +6,32 @@ using Xunit;
 
 namespace ZiziBot.Tests.Services;
 
-public class JadwalSholatOrgSinkServiceTests
+public class JadwalSholatOrgSinkServiceTests(JadwalSholatOrgSinkService jadwalSholatOrgSinkService, MongoDbContextBase mongoDbContextBase)
 {
-    private readonly MongoDbContextBase _mongoDbContextBase;
-    private readonly JadwalSholatOrgSinkService _jadwalSholatOrgSinkService;
-
-    public JadwalSholatOrgSinkServiceTests(JadwalSholatOrgSinkService jadwalSholatOrgSinkService, MongoDbContextBase mongoDbContextBase)
-    {
-        _mongoDbContextBase = mongoDbContextBase;
-        _jadwalSholatOrgSinkService = jadwalSholatOrgSinkService;
-    }
-
     [Fact(Skip = "Deprecated")]
     public async Task FeedCityTest()
     {
-        _mongoDbContextBase.JadwalSholatOrg_City.RemoveRange(entity => true);
-        await _mongoDbContextBase.SaveChangesAsync();
+        mongoDbContextBase.JadwalSholatOrg_City.RemoveRange(entity => true);
+        await mongoDbContextBase.SaveChangesAsync();
 
-        await _jadwalSholatOrgSinkService.FeedCity();
+        await jadwalSholatOrgSinkService.FeedCity();
     }
 
     [Fact(Skip = "Deprecated")]
     public async Task FeedScheduleTest()
     {
-        var cities = await _mongoDbContextBase.JadwalSholatOrg_City.ToListAsync();
+        var cities = await mongoDbContextBase.JadwalSholatOrg_City.ToListAsync();
 
         var randomCities = cities.Shuffle().Take(3);
 
-        await randomCities.ForEachAsync(async entity => await _jadwalSholatOrgSinkService.FeedSchedule(entity.CityId));
+        await randomCities.ForEachAsync(async entity => await jadwalSholatOrgSinkService.FeedSchedule(entity.CityId));
     }
 
     [Theory(Skip = "Deprecated")]
     [InlineData(124)]
     public async Task FeedSchedule_ByCity_Test(int cityId)
     {
-        var feedSchedule = await _jadwalSholatOrgSinkService.FeedSchedule(cityId);
+        var feedSchedule = await jadwalSholatOrgSinkService.FeedSchedule(cityId);
 
         feedSchedule.Should().BeGreaterThan(0, because: "Expected FeedSchedule to insert at least one schedule for the given cityId");
     }

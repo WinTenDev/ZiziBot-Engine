@@ -3,19 +3,12 @@ using Xunit;
 
 namespace ZiziBot.Tests.Repository;
 
-public class AppSettingTest
+public class AppSettingTest(AppSettingRepository appSettingRepository)
 {
-    private readonly AppSettingRepository _appSettingRepository;
-
-    public AppSettingTest(AppSettingRepository appSettingRepository)
-    {
-        _appSettingRepository = appSettingRepository;
-    }
-
     [Fact]
     public async Task GetAppSetting()
     {
-        var config = await _appSettingRepository.GetConfigSectionAsync<EngineConfig>();
+        var config = await appSettingRepository.GetConfigSectionAsync<EngineConfig>();
 
         true.Should().Be(true);
     }

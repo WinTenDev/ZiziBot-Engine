@@ -5,8 +5,7 @@ namespace ZiziBot.Application.Handlers.RestApis.Group;
 
 public class ListWelcomeMessageRequest : ApiRequestBase<List<WelcomeMessageResponse>>
 {
-    [FromQuery]
-    public long ChatId { get; set; }
+    [FromQuery] public long ChatId { get; set; }
 }
 
 public class WelcomeMessageResponse
@@ -23,28 +22,22 @@ public class WelcomeMessageResponse
     public string StatusName { get; set; }
 }
 
-public class ListWelcomeMessageHandler : IRequestHandler<ListWelcomeMessageRequest, ApiResponseBase<List<WelcomeMessageResponse>>>
+public class ListWelcomeMessageHandler(
+    DataFacade dataFacade
+) : IRequestHandler<ListWelcomeMessageRequest, ApiResponseBase<List<WelcomeMessageResponse>>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public ListWelcomeMessageHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<ApiResponseBase<List<WelcomeMessageResponse>>> Handle(ListWelcomeMessageRequest request, CancellationToken cancellationToken)
     {
         var response = new ApiResponseBase<List<WelcomeMessageResponse>>();
 
-        var query = await _mongoDbContext.WelcomeMessage
+        var query = await dataFacade.MongoDb.WelcomeMessage
             .AsNoTracking()
             .WhereIf(request.ChatId != 0, entity => entity.ChatId == request.ChatId)
             .Where(entity => entity.Status != (int)EventStatus.Deleted)
             .Where(entity => request.ListChatId.Contains(entity.ChatId))
             .ToListAsync(cancellationToken: cancellationToken);
 
-        var data = query.Select(entity => new WelcomeMessageResponse
-        {
+        var data = query.Select(entity => new WelcomeMessageResponse {
             Id = entity.Id.ToString(),
             ChatId = entity.ChatId,
             Text = entity.Text,

@@ -7,20 +7,13 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class DebugController : CommandController
+public class DebugController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public DebugController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("about")]
     [Command("start")]
     public async Task GetAbout(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetAboutBotRequest()
+        await mediatorService.EnqueueAsync(new GetAboutBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -36,7 +29,7 @@ public class DebugController : CommandController
     [Command("id")]
     public async Task GetId(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetIdBotRequestModel()
+        await mediatorService.EnqueueAsync(new GetIdBotRequestModel()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -52,7 +45,7 @@ public class DebugController : CommandController
     [Command("si")]
     public async Task GetSystemInfo(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetSystemInfoRequest()
+        await mediatorService.EnqueueAsync(new GetSystemInfoRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -68,7 +61,7 @@ public class DebugController : CommandController
     [Command("fid")]
     public async Task GetFileId(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetFileIdBotRequest()
+        await mediatorService.EnqueueAsync(new GetFileIdBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -86,7 +79,7 @@ public class DebugController : CommandController
     [Command("json")]
     public async Task GetDebug(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetDebugBotRequest()
+        await mediatorService.EnqueueAsync(new GetDebugBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -104,7 +97,7 @@ public class DebugController : CommandController
     [Command("demote")]
     public async Task PromoteMember(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new PromoteMemberBotRequest()
+        await mediatorService.EnqueueAsync(new PromoteMemberBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -122,7 +115,7 @@ public class DebugController : CommandController
     [TypedCommand(MessageType.ForumTopicEdited)]
     public async Task OnTopicChange(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new ThreadUpdateBotRequest()
+        await mediatorService.EnqueueAsync(new ThreadUpdateBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

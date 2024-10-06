@@ -4,9 +4,9 @@ namespace ZiziBot.Application.Utils;
 
 public static class HttpContextUtil
 {
-    public static string GetTransactionId(this IHttpContextAccessor contextAccessor)
+    public static string GetTransactionId(this IHttpContextAccessor? contextAccessor)
     {
-        var transactionId = contextAccessor.HttpContext?.Request.Headers[HeaderKey.TransactionId].ToString();
+        var transactionId = contextAccessor?.HttpContext?.Request.Headers[HeaderKey.TransactionId].ToString();
         return transactionId ?? string.Empty;
     }
 

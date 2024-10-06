@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using ZiziBot.Application.Facades;
 
 namespace ZiziBot.Application.Handlers.Telegram.Middleware;
 
@@ -30,6 +29,7 @@ public class CheckUsernamePipelineBehavior<TRequest, TResponse>(
                 PipelineResultAction.Mute,
                 PipelineResultAction.Warn
             });
+
             return await next();
         }
 

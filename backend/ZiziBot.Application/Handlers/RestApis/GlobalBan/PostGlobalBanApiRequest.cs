@@ -7,8 +7,7 @@ namespace ZiziBot.Application.Handlers.RestApis.GlobalBan;
 
 public class PostGlobalBanApiRequest : ApiRequestBase<bool>
 {
-    [FromBody]
-    public PostGlobalBanApiModel Model { get; set; }
+    [FromBody] public PostGlobalBanApiModel Model { get; set; }
 }
 
 public class PostGlobalBanApiModel
@@ -25,21 +24,15 @@ public class PostGlobalBanApiValidator : AbstractValidator<PostGlobalBanApiReque
     }
 }
 
-public class PostGlobalBanApiHandler : IRequestHandler<PostGlobalBanApiRequest, ApiResponseBase<bool>>
+public class PostGlobalBanApiHandler(
+    DataFacade dataFacade
+) : IRequestHandler<PostGlobalBanApiRequest, ApiResponseBase<bool>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public PostGlobalBanApiHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
-    public async Task<ApiResponseBase<bool>> Handle(PostGlobalBanApiRequest request,
-        CancellationToken cancellationToken)
+    public async Task<ApiResponseBase<bool>> Handle(PostGlobalBanApiRequest request, CancellationToken cancellationToken)
     {
         var response = new ApiResponseBase<bool>();
 
-        var globalBan = await _mongoDbContext.GlobalBan.FirstOrDefaultAsync(entity =>
+        var globalBan = await dataFacade.MongoDb.GlobalBan.FirstOrDefaultAsync(entity =>
                 entity.UserId == request.Model.UserId &&
                 entity.Status == (int)EventStatus.Complete,
             cancellationToken: cancellationToken);
@@ -50,14 +43,14 @@ public class PostGlobalBanApiHandler : IRequestHandler<PostGlobalBanApiRequest, 
         }
         else
         {
-            _mongoDbContext.GlobalBan.Add(new GlobalBanEntity() {
+            dataFacade.MongoDb.GlobalBan.Add(new GlobalBanEntity() {
                 UserId = request.Model.UserId,
                 Reason = request.Model.Reason,
                 Status = (int)EventStatus.Complete
             });
         }
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return response.Success("Global ban saved.", true);
     }

@@ -1,21 +1,15 @@
 namespace ZiziBot.Application.Handlers.Telegram.Basic;
 
 public class GetDebugBotRequest : BotRequestBase
+{ }
+
+public class GetDebugHandler(
+    ServiceFacade serviceFacade
+) : IBotRequestHandler<GetDebugBotRequest>
 {
-}
-
-public class GetDebugHandler : IBotRequestHandler<GetDebugBotRequest>
-{
-    private readonly TelegramService _telegramService;
-
-    public GetDebugHandler(TelegramService telegramService)
-    {
-        _telegramService = telegramService;
-    }
-
     public async Task<BotResponseBase> Handle(GetDebugBotRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         var htmlMessage = HtmlMessage.Empty
             .BoldBr("Debug Request")
@@ -23,7 +17,7 @@ public class GetDebugHandler : IBotRequestHandler<GetDebugBotRequest>
 
         var message = request.Message;
 
-        switch (_telegramService.GetCommand())
+        switch (serviceFacade.TelegramService.GetCommand())
         {
             case "/dbg":
                 htmlMessage.CodeBr(message.ToYaml().HtmlDecode());
@@ -33,6 +27,6 @@ public class GetDebugHandler : IBotRequestHandler<GetDebugBotRequest>
                 break;
         }
 
-        return await _telegramService.SendMessageText(htmlMessage.ToString());
+        return await serviceFacade.TelegramService.SendMessageText(htmlMessage.ToString());
     }
 }

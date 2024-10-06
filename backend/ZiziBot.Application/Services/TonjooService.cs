@@ -4,28 +4,19 @@ using Microsoft.Extensions.Logging;
 
 namespace ZiziBot.Application.Services;
 
-public class TonjooService
+public class TonjooService(ILogger<TonjooService> logger, AdditionalRepository additionalRepository)
 {
-    private readonly ILogger<TonjooService> _logger;
-    private readonly AdditionalRepository _additionalRepository;
-
-    public TonjooService(ILogger<TonjooService> logger, AdditionalRepository additionalRepository)
-    {
-        _logger = logger;
-        _additionalRepository = additionalRepository;
-    }
-
     public async Task<string> GetAwbInfoMerged(string courier, string awb)
     {
         var htmlMessage = HtmlMessage.Empty;
 
-        _logger.LogInformation("Getting AWB info from DB. Courier: {Courier}, Awb: {Awb}", courier, awb);
-        var storedAwb = await _additionalRepository.GetStoredAwb(courier, awb);
+        logger.LogInformation("Getting AWB info from DB. Courier: {Courier}, Awb: {Awb}", courier, awb);
+        var storedAwb = await additionalRepository.GetStoredAwb(courier, awb);
         var detail = storedAwb?.Detail;
 
         if (storedAwb == null)
         {
-            _logger.LogDebug("Getting AWB info from API. Courier: {Courier}, Awb: {Awb}", courier, awb);
+            logger.LogDebug("Getting AWB info from API. Courier: {Courier}, Awb: {Awb}", courier, awb);
 
             var awbInfoRaw = await GetAwbInfoRaw(courier, awb);
 
@@ -39,12 +30,12 @@ public class TonjooService
 
             if (detail?.Status.Contains("delivered", StringComparison.InvariantCultureIgnoreCase) ?? false)
             {
-                _logger.LogDebug("Storing AWB info to DB. Courier: {Courier}, Awb: {Awb}", courier, awb);
-                await _additionalRepository.SaveAwbInfo(detail);
+                logger.LogDebug("Storing AWB info to DB. Courier: {Courier}, Awb: {Awb}", courier, awb);
+                await additionalRepository.SaveAwbInfo(detail);
             }
         }
 
-        _logger.LogInformation("Merging AWB info. Courier: {Courier}, Awb: {Awb}", courier, awb);
+        logger.LogInformation("Merging AWB info. Courier: {Courier}, Awb: {Awb}", courier, awb);
         htmlMessage
             .Bold("📦 Ringkasan").Br()
             .Bold("Kurir: ").CodeBr(detail.Kurir.FirstOrDefault())

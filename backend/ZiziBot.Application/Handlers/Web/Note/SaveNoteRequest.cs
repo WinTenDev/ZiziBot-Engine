@@ -26,22 +26,13 @@ public class SaveNoteValidator : AbstractValidator<SaveNoteRequest>
     }
 }
 
-public class CreateNoteHandler : IRequestHandler<SaveNoteRequest, WebResponseBase<bool>>
+public class CreateNoteHandler(IHttpContextAccessor httpContextAccessor, NoteService noteService) : IRequestHandler<SaveNoteRequest, WebResponseBase<bool>>
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly NoteService _noteService;
-
-    public CreateNoteHandler(IHttpContextAccessor httpContextAccessor, NoteService noteService)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _noteService = noteService;
-    }
-
     public async Task<WebResponseBase<bool>> Handle(SaveNoteRequest request, CancellationToken cancellationToken)
     {
         WebResponseBase<bool> response = new();
 
-        var save = await _noteService.Save(new NoteEntity() {
+        var save = await noteService.Save(new NoteEntity() {
             Id = request.ObjectId,
             ChatId = request.ChatId,
             Query = request.Query,
@@ -50,8 +41,8 @@ public class CreateNoteHandler : IRequestHandler<SaveNoteRequest, WebResponseBas
             RawButton = request.RawButton,
             DataType = request.DataType,
             Status = (int)EventStatus.Complete,
-            UserId = _httpContextAccessor.GetUserId(),
-            TransactionId = _httpContextAccessor.GetTransactionId()
+            UserId = httpContextAccessor.GetUserId(),
+            TransactionId = httpContextAccessor.GetTransactionId()
         });
 
         return response.Success(save.Message, true);

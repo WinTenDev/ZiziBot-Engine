@@ -3,27 +3,16 @@ using Xunit;
 
 namespace ZiziBot.Tests.Pipelines;
 
-public class NoteTests
+public class NoteTests(MediatorService mediatorService, AppSettingRepository appSettingRepository, MongoDbContextBase mongoDbContext)
 {
-    private readonly MediatorService _mediatorService;
-    private readonly AppSettingRepository _appSettingRepository;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public NoteTests(MediatorService mediatorService, AppSettingRepository appSettingRepository, MongoDbContextBase mongoDbContext)
-    {
-        _mediatorService = mediatorService;
-        _appSettingRepository = appSettingRepository;
-        _mongoDbContext = mongoDbContext;
-    }
-
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task CreateNoteTest(bool refreshNote)
     {
-        var botMain = await _appSettingRepository.GetBotMain();
+        var botMain = await appSettingRepository.GetBotMain();
 
-        var result = await _mediatorService.EnqueueAsync(new CreateNoteBotRequest()
+        var result = await mediatorService.EnqueueAsync(new CreateNoteBotRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,
@@ -43,20 +32,20 @@ public class NoteTests
     public async Task DeleteNoteTest(string note)
     {
         // Arrange
-        _mongoDbContext.Note.Add(new NoteEntity()
+        mongoDbContext.Note.Add(new NoteEntity()
         {
             ChatId = SampleMessages.CommonMessage.Chat.Id,
             Query = note,
             Status = (int)EventStatus.Complete
         });
 
-        await _mongoDbContext.SaveChangesAsync();
+        await mongoDbContext.SaveChangesAsync();
 
 
         // Act
-        var botMain = await _appSettingRepository.GetBotMain();
+        var botMain = await appSettingRepository.GetBotMain();
 
-        await _mediatorService.EnqueueAsync(new DeleteNoteRequest()
+        await mediatorService.EnqueueAsync(new DeleteNoteRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,
@@ -68,9 +57,9 @@ public class NoteTests
     [InlineData("ini-note-ngab")]
     public async Task DeleteNoteAlreadyDeletedTest(string note)
     {
-        var botMain = await _appSettingRepository.GetBotMain();
+        var botMain = await appSettingRepository.GetBotMain();
 
-        await _mediatorService.EnqueueAsync(new DeleteNoteRequest()
+        await mediatorService.EnqueueAsync(new DeleteNoteRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,

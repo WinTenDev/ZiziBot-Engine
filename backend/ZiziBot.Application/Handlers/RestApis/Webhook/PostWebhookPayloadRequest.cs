@@ -6,17 +6,13 @@ namespace ZiziBot.Application.Handlers.RestApis.Webhook;
 
 public class PostWebhookPayloadRequest : ApiRequestBase<PostWebhookPayloadResponseDto>
 {
-    [FromRoute(Name = "targetId")]
-    public string targetId { get; set; }
+    [FromRoute(Name = "targetId")] public string targetId { get; set; }
 
-    [FromHeader(Name = "User-Agent")]
-    public string UserAgent { get; set; }
+    [FromHeader(Name = "User-Agent")] public string UserAgent { get; set; }
 
-    [FromQuery(Name = "webhookFormat")]
-    public WebhookFormat WebhookFormat { get; set; }
+    [FromQuery(Name = "webhookFormat")] public WebhookFormat WebhookFormat { get; set; }
 
-    [FromQuery(Name = "isDebug")]
-    public bool IsDebug { get; set; }
+    [FromQuery(Name = "isDebug")] public bool IsDebug { get; set; }
 }
 
 public class PostWebhookPayloadResponseDto
@@ -27,12 +23,8 @@ public class PostWebhookPayloadResponseDto
 
 public class PostWebhookPayloadHandler(
     ILogger<PostWebhookPayloadHandler> logger,
-    IMediator mediator,
-    MediatorService mediatorService,
-    MongoDbContextBase mongoDbContextBase,
-    WebhookService webhookService,
-    AppSettingRepository appSettingRepository,
-    ChatSettingRepository chatSettingRepository
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
 ) : IRequestHandler<PostWebhookPayloadRequest, ApiResponseBase<PostWebhookPayloadResponseDto>>
 {
     public async Task<ApiResponseBase<PostWebhookPayloadResponseDto>> Handle(
@@ -53,7 +45,7 @@ public class PostWebhookPayloadHandler(
             return response.BadRequest("Webhook payload is empty");
         }
 
-        var webhookChat = await chatSettingRepository.GetWebhookRouteById(request.targetId);
+        var webhookChat = await dataFacade.ChatSetting.GetWebhookRouteById(request.targetId);
 
         if (webhookChat == null)
         {
@@ -61,12 +53,11 @@ public class PostWebhookPayloadHandler(
         }
 
         if (request.IsDebug)
-        {
-        }
+        { }
 
         var webhookResponse = webhookSource switch {
-            WebhookSource.GitHub => await webhookService.ParseGitHub(webhookHeader, content),
-            WebhookSource.GitLab => await webhookService.ParseGitLab(webhookHeader, content),
+            WebhookSource.GitHub => await serviceFacade.WebhookService.ParseGitHub(webhookHeader, content),
+            WebhookSource.GitLab => await serviceFacade.WebhookService.ParseGitLab(webhookHeader, content),
             _ => default
         };
 
@@ -75,7 +66,7 @@ public class PostWebhookPayloadHandler(
             return response.BadRequest("Webhook can't be processed");
         }
 
-        await mediatorService.EnqueueAsync(new SendWebhookMessageRequest() {
+        await serviceFacade.MediatorService.EnqueueAsync(new SendWebhookMessageRequest() {
             targetId = request.targetId,
             Event = webhookHeader.Event,
             TransactionId = request.TransactionId,

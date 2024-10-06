@@ -61,8 +61,7 @@ public class CacheTowerSqliteProvider : ICacheLayer
         var findCache = await dbContext.SqliteCache.FirstOrDefaultAsync(x => x.CacheKey == cacheKey);
         if (findCache == null)
         {
-            await dbContext.SqliteCache.AddAsync(new SqliteCacheEntity()
-            {
+            await dbContext.SqliteCache.AddAsync(new SqliteCacheEntity() {
                 CacheKey = cacheKey,
                 Value = cacheEntry.Value.ToJson(),
                 Expiry = cacheEntry.Expiry
@@ -81,7 +80,9 @@ public class CacheTowerSqliteProvider : ICacheLayer
     {
         var dbContext = GetContext();
 
-        var obj = await dbContext.SqliteCache.Where(x => x.CacheKey == cacheKey).FirstOrDefaultAsync();
+        var obj = await dbContext.SqliteCache.AsNoTracking()
+            .Where(x => x.CacheKey == cacheKey)
+            .FirstOrDefaultAsync();
 
         return obj != null;
     }

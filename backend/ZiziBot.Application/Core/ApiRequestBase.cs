@@ -16,7 +16,7 @@ public class ApiRequestBase<T> : IRequest<ApiResponseBase<T>>
 
     [BindNever]
     [SwaggerIgnore]
-    public string? TransactionId => Headers[HeaderKey.TransactionId];
+    public string? TransactionId => HttpContextAccessor.GetTransactionId();
 
     [BindNever]
     [SwaggerIgnore]

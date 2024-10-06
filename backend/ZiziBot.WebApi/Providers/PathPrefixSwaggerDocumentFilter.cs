@@ -3,16 +3,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ZiziBot.WebApi.Providers;
 
-public class PathPrefixSwaggerDocumentFilter : IDocumentFilter
+public class PathPrefixSwaggerDocumentFilter(string prefix) : IDocumentFilter
 {
-	private readonly string _prefix;
-
-	public PathPrefixSwaggerDocumentFilter(string prefix)
-	{
-		_prefix = prefix;
-	}
-
-	public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
 	{
 		var paths = swaggerDoc.Paths.Keys.ToList();
 
@@ -20,7 +13,7 @@ public class PathPrefixSwaggerDocumentFilter : IDocumentFilter
 			path => {
 				var pathToChange = swaggerDoc.Paths[path];
 				swaggerDoc.Paths.Remove(path);
-				swaggerDoc.Paths.Add(_prefix + path, pathToChange);
+				swaggerDoc.Paths.Add(prefix + path, pathToChange);
 			}
 		);
 	}

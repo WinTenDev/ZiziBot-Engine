@@ -4,18 +4,11 @@ using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.DataSource.Repository;
 
-public class MirrorUserRepository
+public class MirrorUserRepository(MongoDbContextBase mongoDbContext)
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public MirrorUserRepository(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<MirrorUserEntity?> GetByUserId(long userId)
     {
-        var userEntity = await _mongoDbContext.MirrorUsers.AsNoTracking()
+        var userEntity = await mongoDbContext.MirrorUsers.AsNoTracking()
             .Where(x => x.UserId == userId)
             .Where(x => x.Status == (int)EventStatus.Complete)
             .FirstOrDefaultAsync();

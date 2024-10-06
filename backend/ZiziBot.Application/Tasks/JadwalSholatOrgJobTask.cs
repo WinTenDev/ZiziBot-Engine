@@ -4,15 +4,9 @@ using Serilog;
 
 namespace ZiziBot.Application.Tasks;
 
-public class JadwalSholatOrgJobTask : IStartupTask
+public class JadwalSholatOrgJobTask(MongoDbContextBase mongoDbContextBase) : IStartupTask
 {
-    private readonly MongoDbContextBase _mongoDbContextBase;
     public bool SkipAwait { get; set; }
-
-    public JadwalSholatOrgJobTask(MongoDbContextBase mongoDbContextBase)
-    {
-        _mongoDbContextBase = mongoDbContextBase;
-    }
 
     public async Task ExecuteAsync()
     {
@@ -23,11 +17,11 @@ public class JadwalSholatOrgJobTask : IStartupTask
             cronExpression: TimeUtil.MonthInterval(1)
         );
 
-        var checkCity = await _mongoDbContextBase.JadwalSholatOrg_City.AsNoTracking()
+        var checkCity = await mongoDbContextBase.JadwalSholatOrg_City.AsNoTracking()
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .CountAsync();
 
-        var checkSchedule = await _mongoDbContextBase.JadwalSholatOrg_Schedule.AsNoTracking()
+        var checkSchedule = await mongoDbContextBase.JadwalSholatOrg_Schedule.AsNoTracking()
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .CountAsync();
 

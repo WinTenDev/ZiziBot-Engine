@@ -4,8 +4,7 @@ using MongoFramework.Linq;
 namespace ZiziBot.Application.Handlers.RestApis.DashboardSession;
 
 public class CheckDashboardBearerSessionRequestDto : ApiRequestBase<CheckDashboardBearerSessionResponseDto>
-{
-}
+{ }
 
 public class CheckDashboardBearerSessionResponseDto
 {
@@ -24,26 +23,19 @@ public class UserFeature
     public int MinimumRole { get; set; }
 }
 
-public class CheckDashboardBearerSessionRequestHandler : IRequestHandler<CheckDashboardBearerSessionRequestDto, ApiResponseBase<CheckDashboardBearerSessionResponseDto>>
+public class CheckDashboardBearerSessionRequestHandler(
+    ILogger<CheckDashboardSessionRequestHandler> logger,
+    MongoDbContextBase mongoDbContext
+)
+    : IRequestHandler<CheckDashboardBearerSessionRequestDto, ApiResponseBase<CheckDashboardBearerSessionResponseDto>>
 {
-    private readonly ILogger<CheckDashboardSessionRequestHandler> _logger;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public CheckDashboardBearerSessionRequestHandler(
-        ILogger<CheckDashboardSessionRequestHandler> logger,
-        MongoDbContextBase mongoDbContext
-    )
-    {
-        _logger = logger;
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<ApiResponseBase<CheckDashboardBearerSessionResponseDto>> Handle(CheckDashboardBearerSessionRequestDto request, CancellationToken cancellationToken)
     {
         ApiResponseBase<CheckDashboardBearerSessionResponseDto> response = new();
 
         #region Check Dashboard Session
-        var dashboardSession = await _mongoDbContext.DashboardSessions
+
+        var dashboardSession = await mongoDbContext.DashboardSessions
             .Where(entity =>
                 entity.BearerToken == request.BearerToken &&
                 entity.Status == (int)EventStatus.Complete
@@ -56,11 +48,12 @@ public class CheckDashboardBearerSessionRequestHandler : IRequestHandler<CheckDa
         }
 
         var userId = dashboardSession.TelegramUserId;
+
         #endregion
 
         #region Get User Role
-        var result = new CheckDashboardBearerSessionResponseDto()
-        {
+
+        var result = new CheckDashboardBearerSessionResponseDto() {
             IsSessionValid = true,
             UserName = dashboardSession.FirstName,
             PhotoUrl = dashboardSession.PhotoUrl,
@@ -69,7 +62,7 @@ public class CheckDashboardBearerSessionRequestHandler : IRequestHandler<CheckDa
             Features = new List<UserFeature>()
         };
 
-        var checkSudo = await _mongoDbContext.Sudoers
+        var checkSudo = await mongoDbContext.Sudoers
             .FirstOrDefaultAsync(entity =>
                     entity.UserId == userId &&
                     entity.Status == (int)EventStatus.Complete,
@@ -80,39 +73,35 @@ public class CheckDashboardBearerSessionRequestHandler : IRequestHandler<CheckDa
             result.RoleId = 1;
             result.RoleName = "Sudo";
         }
+
         #endregion
 
         result.Features = GetFeatures(result.RoleId);
 
-        _logger.LogDebug("Session {SessionId} for user {UserId} is? {@Session}", dashboardSession.SessionId, userId, dashboardSession);
+        logger.LogDebug("Session {SessionId} for user {UserId} is? {@Session}", dashboardSession.SessionId, userId, dashboardSession);
 
         return response.Success("Session is valid", result);
     }
 
     private List<UserFeature> GetFeatures(int roleId)
     {
-        var features = new List<UserFeature>()
-        {
-            new()
-            {
+        var features = new List<UserFeature>() {
+            new() {
                 Title = "Mirror User",
                 Url = "/mirror-user/management",
                 MinimumRole = 1
             },
-            new()
-            {
+            new() {
                 Title = "Fed Management",
                 Url = "/antispam/fed-ban-management",
                 MinimumRole = 1
             },
-            new()
-            {
+            new() {
                 Title = "Notes Management",
                 Url = "/notes/notes-management",
                 MinimumRole = 1
             },
-            new()
-            {
+            new() {
                 Title = "Angular",
                 Url = "/angular",
                 MinimumRole = 9

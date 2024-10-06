@@ -9,8 +9,7 @@ namespace ZiziBot.Application.Handlers.RestApis.Group;
 
 public class SaveWelcomeMessageRequest : ApiRequestBase<object>
 {
-    [FromBody]
-    public SaveWelcomeMessageRequestModel Model { get; set; }
+    [FromBody] public SaveWelcomeMessageRequestModel Model { get; set; }
 }
 
 public class SaveWelcomeMessageValidation : AbstractValidator<SaveWelcomeMessageRequest>
@@ -32,18 +31,15 @@ public class SaveWelcomeMessageRequestModel
     public int DataType { get; set; } = -1;
 
     [BindNever]
-    public ObjectId ObjectId => Id != null ? new ObjectId(Id) : ObjectId.Empty;
+    public ObjectId ObjectId => Id != null ?
+        new ObjectId(Id) :
+        ObjectId.Empty;
 }
 
-public class SaveWelcomeMessageHandler : IRequestHandler<SaveWelcomeMessageRequest, ApiResponseBase<object>>
+public class SaveWelcomeMessageHandler(
+    DataFacade dataFacade
+) : IRequestHandler<SaveWelcomeMessageRequest, ApiResponseBase<object>>
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public SaveWelcomeMessageHandler(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task<ApiResponseBase<object>> Handle(SaveWelcomeMessageRequest request,
         CancellationToken cancellationToken)
     {
@@ -54,21 +50,23 @@ public class SaveWelcomeMessageHandler : IRequestHandler<SaveWelcomeMessageReque
             return response.BadRequest("You don't have access to this Group");
         }
 
-        var findWelcome = await _mongoDbContext.WelcomeMessage
+        var findWelcome = await dataFacade.MongoDb.WelcomeMessage
             .FirstOrDefaultAsync(x => x.Id == request.Model.ObjectId, cancellationToken);
 
         if (findWelcome == null)
         {
-            var welcomeMessage = await _mongoDbContext.WelcomeMessage
+            var welcomeMessage = await dataFacade.MongoDb.WelcomeMessage
                 .FirstOrDefaultAsync(x => x.ChatId == request.Model.ChatId, cancellationToken);
 
-            _mongoDbContext.WelcomeMessage.Add(new WelcomeMessageEntity {
+            dataFacade.MongoDb.WelcomeMessage.Add(new WelcomeMessageEntity {
                 ChatId = request.Model.ChatId,
                 Text = request.Model.Text,
                 RawButton = request.Model.RawButton,
                 Media = request.Model.Media,
                 DataType = request.Model.DataType,
-                Status = welcomeMessage == null ? (int)EventStatus.Complete : (int)EventStatus.Inactive,
+                Status = welcomeMessage == null ?
+                    (int)EventStatus.Complete :
+                    (int)EventStatus.Inactive,
                 TransactionId = request.TransactionId
             });
         }
@@ -82,7 +80,7 @@ public class SaveWelcomeMessageHandler : IRequestHandler<SaveWelcomeMessageReque
             findWelcome.Status = (int)EventStatus.InProgress;
         }
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return response.Success("Save Welcome Message successfully", true);
     }

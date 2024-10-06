@@ -5,17 +5,10 @@ using Telegram.Bot.Types.Enums;
 
 namespace ZiziBot.Kot.MongoMigrations.Seeders;
 
-public class BotCommandSeedMigration : MongoMigration
+public class BotCommandSeedMigration(ILogger<BotCommandSeedMigration> logger, MongoDbContextBase mongoDbContext) : MongoMigration(DBVersion)
 {
-    private readonly ILogger<BotCommandSeedMigration> _logger;
-    private readonly MongoDbContextBase _mongoDbContext;
+    private readonly ILogger<BotCommandSeedMigration> _logger = logger;
     private static DatabaseVersion DBVersion => new("233.30.1");
-
-    public BotCommandSeedMigration(ILogger<BotCommandSeedMigration> logger, MongoDbContextBase mongoDbContext) : base(DBVersion)
-    {
-        _logger = logger;
-        _mongoDbContext = mongoDbContext;
-    }
 
     public override async Task DownAsync(IMongoDatabase db, IClientSessionHandle session, CancellationToken cancellationToken)
     {
@@ -24,7 +17,7 @@ public class BotCommandSeedMigration : MongoMigration
 
     public override async Task UpAsync(IMongoDatabase db, IClientSessionHandle session, CancellationToken cancellationToken)
     {
-        _mongoDbContext.BotCommand.AddRange(new[]
+        mongoDbContext.BotCommand.AddRange(new[]
         {
             new BotCommandEntity()
             {
@@ -49,6 +42,6 @@ public class BotCommandSeedMigration : MongoMigration
             },
         });
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await mongoDbContext.SaveChangesAsync(cancellationToken);
     }
 }

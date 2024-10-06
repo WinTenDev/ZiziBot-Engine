@@ -4,15 +4,8 @@ using MongoFramework.Linq;
 
 namespace ZiziBot.WebApi.Middlewares;
 
-public class InjectHeaderMiddleware : IMiddleware
+public class InjectHeaderMiddleware(MongoDbContextBase mongoDbContext) : IMiddleware
 {
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public InjectHeaderMiddleware(MongoDbContextBase mongoDbContext)
-    {
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         var bearerToken = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
@@ -40,7 +33,7 @@ public class InjectHeaderMiddleware : IMiddleware
         }
 
         #region Check Dashboard Session
-        var dashboardSession = await _mongoDbContext.DashboardSessions
+        var dashboardSession = await mongoDbContext.DashboardSessions
             .Where(entity =>
                 entity.BearerToken == bearerToken &&
                 entity.Status == (int)EventStatus.Complete
@@ -62,7 +55,7 @@ public class InjectHeaderMiddleware : IMiddleware
         #endregion
 
         #region Add List ChatId
-        var chatAdmin = await _mongoDbContext.ChatAdmin
+        var chatAdmin = await mongoDbContext.ChatAdmin
             .Where(entity =>
                 entity.UserId == dashboardSession.TelegramUserId &&
                 entity.Status == (int)EventStatus.Complete
@@ -77,7 +70,7 @@ public class InjectHeaderMiddleware : IMiddleware
         #region Add User Role
         var userRole = ApiRole.Guest;
 
-        var checkSudo = await _mongoDbContext.Sudoers
+        var checkSudo = await mongoDbContext.Sudoers
             .FirstOrDefaultAsync(entity =>
                 entity.UserId == dashboardSession.TelegramUserId &&
                 entity.Status == (int)EventStatus.Complete);

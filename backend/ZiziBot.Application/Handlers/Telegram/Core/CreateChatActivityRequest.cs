@@ -10,12 +10,15 @@ public class CreateChatActivityRequest : IRequest<object>
     public string TransactionId { get; set; }
 }
 
-public class CreateChatActivityHandler(MongoDbContextBase mongoDbContextBase, TelegramService telegramService)
+public class CreateChatActivityHandler(
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+)
     : IRequestHandler<CreateChatActivityRequest, object>
 {
     public async Task<object> Handle(CreateChatActivityRequest request, CancellationToken cancellationToken)
     {
-        mongoDbContextBase.ChatActivity.Add(new ChatActivityEntity {
+        dataFacade.MongoDb.ChatActivity.Add(new ChatActivityEntity {
             ActivityType = request.ActivityType,
             ActivityTypeName = request.ActivityType.ToString(),
             ChatId = request.SentMessage.Chat.Id,
@@ -27,8 +30,8 @@ public class CreateChatActivityHandler(MongoDbContextBase mongoDbContextBase, Te
             MessageId = request.SentMessage.MessageId
         });
 
-        await mongoDbContextBase.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-        return telegramService.Complete();
+        return serviceFacade.TelegramService.Complete();
     }
 }

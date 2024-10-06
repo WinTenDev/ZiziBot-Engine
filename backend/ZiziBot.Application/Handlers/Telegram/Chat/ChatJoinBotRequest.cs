@@ -1,26 +1,19 @@
 ﻿namespace ZiziBot.Application.Handlers.Telegram.Chat;
 
 public class ChatJoinBotRequest : BotRequestBase
+{ }
+
+public class ChatJoinBotHandler(
+    ServiceFacade serviceFacade
+) : IRequestHandler<ChatJoinBotRequest, BotResponseBase>
 {
-}
-
-public class ChatJoinBotHandler : IRequestHandler<ChatJoinBotRequest, BotResponseBase>
-{
-    private readonly TelegramService _telegramService;
-
-    public ChatJoinBotHandler(TelegramService telegramService)
-    {
-        _telegramService = telegramService;
-
-    }
-
     public async Task<BotResponseBase> Handle(ChatJoinBotRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        await _telegramService.AnswerJoinRequestAsync(request.ChatJoinRequest);
+        await serviceFacade.TelegramService.AnswerJoinRequestAsync(request.ChatJoinRequest);
 
 
-        return _telegramService.Complete();
+        return serviceFacade.TelegramService.Complete();
     }
 }

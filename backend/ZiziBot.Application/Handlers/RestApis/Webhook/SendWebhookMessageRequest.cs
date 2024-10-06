@@ -21,21 +21,19 @@ public class SendWebhookMessageRequest : IRequest<object>
 
 public class SendWebhookMessageRequestHandler(
     ILogger<SendWebhookMessageRequestHandler> logger,
-    MongoDbContextBase mongoDbContextBase,
-    AppSettingRepository appSettingRepository,
-    ChatSettingRepository chatSettingRepository
+    DataFacade dataFacade
 ) : IRequestHandler<SendWebhookMessageRequest, object>
 {
     public async Task<object> Handle(SendWebhookMessageRequest request, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
-        var webhookChat = await chatSettingRepository.GetWebhookRouteById(request.targetId);
-        var botSetting = await appSettingRepository.GetBotMain();
+        var webhookChat = await dataFacade.ChatSetting.GetWebhookRouteById(request.targetId);
+        var botSetting = await dataFacade.AppSetting.GetBotMain();
         var botClient = new TelegramBotClient(botSetting.Token);
 
         Message sentMessage = new();
 
-        var lastMessageId = await chatSettingRepository.LastWebhookMessageBetterEdit(webhookChat.ChatId, request.WebhookSource, request.Event);
+        var lastMessageId = await dataFacade.ChatSetting.LastWebhookMessageBetterEdit(webhookChat.ChatId, request.WebhookSource, request.Event);
 
         try
         {
@@ -78,7 +76,7 @@ public class SendWebhookMessageRequestHandler(
             }
         }
 
-        mongoDbContextBase.WebhookHistory.Add(new WebhookHistoryEntity {
+        dataFacade.MongoDb.WebhookHistory.Add(new WebhookHistoryEntity {
             RouteId = webhookChat.RouteId,
             TransactionId = request.TransactionId,
             CreatedDate = default,
@@ -88,16 +86,23 @@ public class SendWebhookMessageRequestHandler(
             MessageThreadId = 0,
             WebhookSource = WebhookSource.GitHub,
             Elapsed = stopwatch.Elapsed,
-            Payload = request.IsDebug ? request.RawBody : string.Empty,
-            Header = request.IsDebug ? request.RawHeaders : default,
+            Payload = request.IsDebug ?
+                request.RawBody :
+                string.Empty,
+            Header = request.IsDebug ?
+                request.RawHeaders :
+                default,
             EventName = request.Event,
             Status = (int)EventStatus.Complete
         });
 
-        await mongoDbContextBase.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-        var chatActivity = lastMessageId == 0 ? ChatActivityType.BotSendWebHook : ChatActivityType.BotEditWebHook;
-        mongoDbContextBase.ChatActivity.Add(new ChatActivityEntity {
+        var chatActivity = lastMessageId == 0 ?
+            ChatActivityType.BotSendWebHook :
+            ChatActivityType.BotEditWebHook;
+
+        dataFacade.MongoDb.ChatActivity.Add(new ChatActivityEntity {
             ActivityType = chatActivity,
             ActivityTypeName = chatActivity.ToString(),
             ChatId = webhookChat.ChatId,
@@ -111,7 +116,7 @@ public class SendWebhookMessageRequestHandler(
 
         stopwatch.Stop();
 
-        await mongoDbContextBase.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
         return 1;
     }

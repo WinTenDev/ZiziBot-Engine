@@ -7,19 +7,12 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class AdditionalController : CommandController
+public class AdditionalController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public AdditionalController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("afk")]
     public async Task Afk(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new SetAfkBotRequest()
+        await mediatorService.EnqueueAsync(new SetAfkBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -37,7 +30,7 @@ public class AdditionalController : CommandController
     [Command("wh")]
     public async Task CreateWebhook(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new CreateWebhookBotRequest()
+        await mediatorService.EnqueueAsync(new CreateWebhookBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -63,7 +56,7 @@ public class AdditionalController : CommandController
     [TextCommand("wahana", Type = ComparisonTypes.Parameterized)]
     public async Task CheckAwb(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new CheckAwbRequest()
+        await mediatorService.EnqueueAsync(new CheckAwbRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

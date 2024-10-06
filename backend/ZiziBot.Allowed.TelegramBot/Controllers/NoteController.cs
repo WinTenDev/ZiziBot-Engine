@@ -6,20 +6,13 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class NotesController : CommandController
+public class NotesController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public NotesController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("notes")]
     [Command("tags")]
     public async Task GetNotes(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new GetNoteBotRequestModel() {
+        await mediatorService.EnqueueAsync(new GetNoteBotRequestModel() {
             BotToken = data.Options.Token,
             Message = data.Message,
             ReplyMessage = true,
@@ -38,7 +31,7 @@ public class NotesController : CommandController
         var query = data.Params.GetCommandParamAt<string>(0, separator: "\n");
         var rawButton = data.Params.TrimStart(query);
 
-        await _mediatorService.EnqueueAsync(new CreateNoteBotRequest() {
+        await mediatorService.EnqueueAsync(new CreateNoteBotRequest() {
             BotToken = data.Options.Token,
             MinimumRole = RoleLevel.ChatAdminOrPrivate,
             Message = data.Message,
@@ -60,7 +53,7 @@ public class NotesController : CommandController
     [Command("dnote")]
     public async Task DeleteNote(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new DeleteNoteRequest() {
+        await mediatorService.EnqueueAsync(new DeleteNoteRequest() {
             BotToken = data.Options.Token,
             Message = data.Message,
             Note = data.Params,

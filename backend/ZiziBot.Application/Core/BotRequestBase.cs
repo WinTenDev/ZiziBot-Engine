@@ -16,9 +16,9 @@ public class BotRequestBase : IRequest<BotResponseBase>
 
     public Message? Message { get; set; }
 
-    public Message? ReplyToMessage => Message?.ReplyToMessage?.Type is not (MessageType.ForumTopicCreated or MessageType.ForumTopicEdited)
-        ? Message?.ReplyToMessage
-        : default;
+    public Message? ReplyToMessage => Message?.ReplyToMessage?.Type is not (MessageType.ForumTopicCreated or MessageType.ForumTopicEdited) ?
+        Message?.ReplyToMessage :
+        default;
 
     public Message? ChannelPost => Update?.ChannelPost;
     public Message? ChannelPostEdited => Update?.EditedChannelPost;
@@ -55,10 +55,13 @@ public class BotRequestBase : IRequest<BotResponseBase>
     public ChatType ChatType => Message?.Chat.Type ?? default;
     public string ChatTitle => Message?.Chat.Title ?? Message?.From?.FirstName ?? Message?.From?.Username ?? Message?.From?.LastName ?? "Unknown";
 
-    public User? User => ChatJoinRequest?.From ?? Message?.From ?? CallbackQuery?.From ?? InlineQuery?.From ?? default;
+    public User User => ChatJoinRequest?.From ?? Message?.From ?? CallbackQuery?.From ?? InlineQuery?.From ?? new();
     public User? ReplyToUser => ReplyToMessage?.From;
 
     public long UserId => User?.Id ?? 0;
+    public string FirstName => Message?.From?.FirstName ?? string.Empty;
+    public string LastName => Message?.From?.LastName ?? string.Empty;
+    public string Username => Message?.From?.Username ?? string.Empty;
     public string UserFullName => $"{Message?.From?.FirstName} {Message?.From?.LastName}".Trim();
     public string UserLanguageCode => Message?.From?.LanguageCode ?? CallbackQuery?.From?.LanguageCode ?? InlineQuery?.From?.LanguageCode ?? "en";
 

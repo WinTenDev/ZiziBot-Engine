@@ -17,6 +17,7 @@ public static class ErrorUtil
             "message can't be deleted",
             "message to delete not found",
             "multiple root elements",
+            "name does not resolve",
             "name or service not known",
             "no such host is known",
             "not match",

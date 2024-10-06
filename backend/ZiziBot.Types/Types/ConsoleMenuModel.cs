@@ -2,10 +2,9 @@ using System.ComponentModel;
 
 namespace ZiziBot.Types.Types;
 
-public sealed class ConsoleMenuModel : INotifyPropertyChanged
+public sealed class ConsoleMenuModel(Func<List<ConsoleMenuModel>> collection) : INotifyPropertyChanged
 {
     private bool _expanded;
-    private readonly Func<List<ConsoleMenuModel>> _collection;
 
     public string? Text { get; init; }
     public string? Icon { get; init; }
@@ -16,11 +15,6 @@ public sealed class ConsoleMenuModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public ConsoleMenuModel(Func<List<ConsoleMenuModel>> collection)
-    {
-        this._collection = collection;
-    }
-
     public bool Expanded
     {
         get => _expanded;
@@ -28,7 +22,7 @@ public sealed class ConsoleMenuModel : INotifyPropertyChanged
         {
             if (_expanded == value) return;
 
-            _collection().Where(i => i != this).ToList().ForEach(s => s.Expanded = false);
+            collection().Where(i => i != this).ToList().ForEach(s => s.Expanded = false);
 
             _expanded = value;
             OnPropertyChanged(nameof(Expanded));

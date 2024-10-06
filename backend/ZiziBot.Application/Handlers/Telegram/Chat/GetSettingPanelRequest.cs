@@ -5,41 +5,36 @@ using ZiziBot.DataSource.MongoDb.Entities;
 namespace ZiziBot.Application.Handlers.Telegram.Chat;
 
 public class GetSettingPanelBotRequestModel : BotRequestBase
-{
-}
+{ }
 
-public class GetSettingPanelRequestHandler : IRequestHandler<GetSettingPanelBotRequestModel, BotResponseBase>
+public class GetSettingPanelRequestHandler(
+    ILogger<GetSettingPanelRequestHandler> logger,
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+)
+    : IRequestHandler<GetSettingPanelBotRequestModel, BotResponseBase>
 {
-    private readonly ILogger<GetSettingPanelRequestHandler> _logger;
-    private readonly TelegramService _telegramService;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public GetSettingPanelRequestHandler(ILogger<GetSettingPanelRequestHandler> logger, TelegramService telegramService,
-        MongoDbContextBase mongoDbContext)
-    {
-        _logger = logger;
-        _telegramService = telegramService;
-        _mongoDbContext = mongoDbContext;
-    }
+    private readonly ILogger<GetSettingPanelRequestHandler> _logger = logger;
 
     public async Task<BotResponseBase> Handle(GetSettingPanelBotRequestModel request,
         CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var chat = await _mongoDbContext.ChatSetting.FirstOrDefaultAsync(x => x.ChatId == request.ChatIdentifier,
+        var chat = await dataFacade.MongoDb.ChatSetting.FirstOrDefaultAsync(x => x.ChatId == request.ChatIdentifier,
             cancellationToken);
+
         if (chat == null)
         {
-            _mongoDbContext.ChatSetting.Add(new ChatSettingEntity() {
+            dataFacade.MongoDb.ChatSetting.Add(new ChatSettingEntity() {
                 ChatId = request.ChatIdentifier,
             });
 
-            await _mongoDbContext.SaveChangesAsync(cancellationToken);
+            await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
         }
 
-        await _telegramService.SendMessageText("Sedang memuat tombol..");
+        await serviceFacade.TelegramService.SendMessageText("Sedang memuat tombol..");
 
-        return _telegramService.Complete();
+        return serviceFacade.TelegramService.Complete();
     }
 }

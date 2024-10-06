@@ -4,21 +4,15 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace ZiziBot.Application.Handlers.Telegram.Basic;
 
 public class PrepareConsoleBotRequest : BotRequestBase
+{ }
+
+public class PrepareConsoleHandler(
+    ServiceFacade serviceFacade
+) : IRequestHandler<PrepareConsoleBotRequest, BotResponseBase>
 {
-}
-
-public class PrepareConsoleHandler : IRequestHandler<PrepareConsoleBotRequest, BotResponseBase>
-{
-    private readonly TelegramService _telegramService;
-
-    public PrepareConsoleHandler(TelegramService telegramService)
-    {
-        _telegramService = telegramService;
-    }
-
     public async Task<BotResponseBase> Handle(PrepareConsoleBotRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         var sessionId = Guid.NewGuid().ToString();
         var consoleUrl = EnvUtil.GetEnv(Env.WEB_CONSOLE_URL);
@@ -27,7 +21,7 @@ public class PrepareConsoleHandler : IRequestHandler<PrepareConsoleBotRequest, B
 
         if (!EnvUtil.IsEnvExist(Env.WEB_CONSOLE_URL))
         {
-            await _telegramService.SendMessageText("Maaf fitur ini belum dipersiapkan");
+            await serviceFacade.TelegramService.SendMessageText("Maaf fitur ini belum dipersiapkan");
         }
 
         var replyMarkup = InlineKeyboardMarkup.Empty();
@@ -42,18 +36,15 @@ public class PrepareConsoleHandler : IRequestHandler<PrepareConsoleBotRequest, B
         }
         else
         {
-            replyMarkup = new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithLoginUrl("Buka Console", new LoginUrl()
-                    {
+            replyMarkup = new[] {
+                new[] {
+                    InlineKeyboardButton.WithLoginUrl("Buka Console", new LoginUrl() {
                         Url = webUrl
                     })
                 }
             }.ToButtonMarkup();
         }
 
-        return await _telegramService.SendMessageText(htmlMessage.ToString(), replyMarkup);
+        return await serviceFacade.TelegramService.SendMessageText(htmlMessage.ToString(), replyMarkup);
     }
 }

@@ -8,30 +8,34 @@ using ZiziBot.Types.Vendor.Subdl;
 namespace ZiziBot.Application.Handlers.Telegram.Inline;
 
 public class AnswerInlineQuerySubdlRequest : BotRequestBase
-{
-}
+{ }
 
-public class AnswerInlineQuerySubdlHandler(ILogger<AnswerInlineQuerySubdlHandler> logger, TelegramService telegramService, SubdlService subdlService)
-    : IBotRequestHandler<AnswerInlineQuerySubdlRequest>
+public class AnswerInlineQuerySubdlHandler(
+    ILogger<AnswerInlineQuerySubdlHandler> logger,
+    ServiceFacade serviceFacade
+) : IBotRequestHandler<AnswerInlineQuerySubdlRequest>
 {
     public async Task<BotResponseBase> Handle(AnswerInlineQuerySubdlRequest request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
         Popular popular = new();
         IEnumerable<InlineQueryResult>? inlineQueryResults = default;
 
         logger.LogInformation("Find subdl for Query: {query}", request.InlineParam);
         if (request.InlineParam.IsNullOrEmpty())
         {
-            popular = await subdlService.FetchPopular();
+            popular = await serviceFacade.SubdlService.FetchPopular();
         }
         else
         {
-            popular = await subdlService.Search(request.InlineParam);
+            popular = await serviceFacade.SubdlService.Search(request.InlineParam);
         }
 
         inlineQueryResults = popular.Results?.Select(x => {
-            var slugOrPath = x.Slug.IsNullOrEmpty() ? x.Link : "subtitle".AppendPathSegments(x.SdId, x.Slug).ToString();
+            var slugOrPath = x.Slug.IsNullOrEmpty() ?
+                x.Link :
+                "subtitle".AppendPathSegments(x.SdId, x.Slug).ToString();
+
             var subtitleUrl = $"https://subdl.com/".AppendPathSegments(slugOrPath);
             var htmlContent = HtmlMessage.Empty
                 .CodeBr(x.Name)
@@ -63,6 +67,6 @@ public class AnswerInlineQuerySubdlHandler(ILogger<AnswerInlineQuerySubdlHandler
         });
 
 
-        return await telegramService.AnswerInlineQueryAsync(inlineQueryResults);
+        return await serviceFacade.TelegramService.AnswerInlineQueryAsync(inlineQueryResults);
     }
 }

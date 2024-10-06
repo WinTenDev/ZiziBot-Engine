@@ -9,16 +9,18 @@ public class AnswerInlineQueryWebSearchBotRequestModel : BotRequestBase
     public string? Query { get; set; }
 }
 
-public class AnswerInlineQueryWebSearchRequestHandler(TelegramService telegramService)
+public class AnswerInlineQueryWebSearchRequestHandler(
+    ServiceFacade serviceFacade
+)
     : IRequestHandler<AnswerInlineQueryWebSearchBotRequestModel, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(AnswerInlineQueryWebSearchBotRequestModel request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         if (request.Query.IsNullOrEmpty())
         {
-            return await telegramService.AnswerInlineQueryAsync(new List<InlineQueryResult>() {
+            return await serviceFacade.TelegramService.AnswerInlineQueryAsync(new List<InlineQueryResult>() {
                 new InlineQueryResultArticle(
                     id: "guide-1",
                     title: "Ketikkan sebuah kueri untuk memulai pencarian..",
@@ -63,6 +65,6 @@ public class AnswerInlineQueryWebSearchRequestHandler(TelegramService telegramSe
             return fields;
         });
 
-        return await telegramService.AnswerInlineQueryAsync(inlineResult);
+        return await serviceFacade.TelegramService.AnswerInlineQueryAsync(inlineResult);
     }
 }

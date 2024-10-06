@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using ZiziBot.Application.Facades;
 
 namespace ZiziBot.Application.Handlers.Telegram.Middleware;
 

@@ -12,7 +12,7 @@
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2024.2.0"/>
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="8.0.8"/>
-        <PackageReference Include="NewRelic.Agent" Version="10.29.0"/>
+        <PackageReference Include="NewRelic.Agent" Version="10.31.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,44 +32,5 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-
-    <!--  SPA Config  -->
-    <!--    <PropertyGroup>-->
-    <!--        <SpaRoot>..\..\frontend\zizibot-console</SpaRoot>-->
-    <!--        &lt;!&ndash;        <SpaProxyServerUrl>https://console-zizibot-dev-v5.azhe.my.id</SpaProxyServerUrl>&ndash;&gt;-->
-    <!--        <SpaProxyServerUrl>https://127.0.0.1</SpaProxyServerUrl>-->
-    <!--        <SpaProxyLaunchCommand>npm run start-https</SpaProxyLaunchCommand>-->
-    <!--    </PropertyGroup>-->
-    <!--    <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(FrontEndRoot)\node_modules') ">-->
-    <!--        &lt;!&ndash; Ensure Node.js is installed &ndash;&gt;-->
-    <!--        <Exec Command="node &#45;&#45;version" ContinueOnError="true">-->
-    <!--            <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />-->
-    <!--        </Exec>-->
-    <!--        <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />-->
-    <!--        <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />-->
-    <!--        <Exec WorkingDirectory="$(SpaRoot)" Command="pnpm install" />-->
-    <!--    </Target>-->
-    <!--    <Target Name="PublishAngular" AfterTargets="ComputeFilesToPublish">-->
-    <!--        <Message Importance="high" Text="Building SPA files..." />-->
-    <!--        <Exec Command="npm install" WorkingDirectory="$(SpaRoot)" />-->
-    <!--        <Exec Command="npm run build-staging" WorkingDirectory="$(SpaRoot)" />-->
-    <!--        <ItemGroup>-->
-    <!--            <DistFiles Include="$(SpaRoot)\dist\**" />-->
-    <!--            <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">-->
-    <!--                <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>-->
-    <!--                <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>-->
-    <!--                <ExcludeFromSingleFile>true</ExcludeFromSingleFile>-->
-    <!--            </ResolvedFileToPublish>-->
-    <!--        </ItemGroup>-->
-    <!--    </Target>-->
-    <!--  SPA Config  -->
-
-    <!-- Store Build Date -->
-    <!--    <ItemGroup>-->
-    <!--        <AssemblyAttribute Include="ZiziBot.Contracts.Attributes.BuildStampAttribute">-->
-    <!--            <_Parameter1>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</_Parameter1>-->
-    <!--        </AssemblyAttribute>-->
-    <!--    </ItemGroup>-->
-    <!-- Store Build Date -->
 
 </Project>

@@ -44,12 +44,12 @@ public static class StringUtil
 
     public static string GetNanoId(int size = 11)
     {
-        return Nanoid.Generate(size: size);
+        return Nanoid.Generate(alphabet: Nanoid.Alphabets.LettersAndDigits, size: size);
     }
 
     public static async Task<string> GetNanoIdAsync(string prefix = "", int size = 11)
     {
-        var id = await Nanoid.GenerateAsync(size: size);
+        var id = await Nanoid.GenerateAsync(alphabet: Nanoid.Alphabets.LettersAndDigits, size: size);
         return $"{prefix}{id}";
     }
 

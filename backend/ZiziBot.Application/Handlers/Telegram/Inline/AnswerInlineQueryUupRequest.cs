@@ -12,17 +12,16 @@ public class AnswerInlineQueryUupBotRequestModel : BotRequestBase
 
 public class AnswerInlineQueryUupRequestHandler(
     ILogger<AnswerInlineQueryUupRequestHandler> logger,
-    TelegramService telegramService,
-    UupDumpService uupDumpService)
-    : IRequestHandler<AnswerInlineQueryUupBotRequestModel, BotResponseBase>
+    ServiceFacade serviceFacade
+) : IRequestHandler<AnswerInlineQueryUupBotRequestModel, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(AnswerInlineQueryUupBotRequestModel request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         logger.LogInformation("Find UUP for Query: {Query}", request.Query);
 
-        var data = await uupDumpService.GetUpdatesAsync(request.Query);
+        var data = await serviceFacade.UupDumpService.GetUpdatesAsync(request.Query);
 
         var inlineQueryResults = data.Response.Builds
             .OrderByDescending(x => x.Created)
@@ -64,6 +63,6 @@ public class AnswerInlineQueryUupRequestHandler(
                 return fields;
             });
 
-        return await telegramService.AnswerInlineQueryAsync(inlineQueryResults);
+        return await serviceFacade.TelegramService.AnswerInlineQueryAsync(inlineQueryResults);
     }
 }

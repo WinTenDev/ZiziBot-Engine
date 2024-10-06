@@ -1,26 +1,18 @@
 namespace ZiziBot.Application.Handlers.Telegram.Note;
 
 public class GetNoteBotRequestModel : BotRequestBase
+{ }
+
+public class GetNoteRequestHandler(
+    ServiceFacade serviceFacade
+) : IRequestHandler<GetNoteBotRequestModel, BotResponseBase>
 {
-}
-
-public class GetNoteRequestHandler : IRequestHandler<GetNoteBotRequestModel, BotResponseBase>
-{
-    private readonly TelegramService _telegramService;
-    private readonly NoteService _noteService;
-
-    public GetNoteRequestHandler(TelegramService telegramService, NoteService noteService)
-    {
-        _telegramService = telegramService;
-        _noteService = noteService;
-    }
-
     public async Task<BotResponseBase> Handle(GetNoteBotRequestModel request, CancellationToken cancellationToken)
     {
         var htmlMessage = HtmlMessage.Empty;
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        var allNotes = await _noteService.GetAllByChat(request.ChatIdentifier);
+        var allNotes = await serviceFacade.NoteService.GetAllByChat(request.ChatIdentifier);
 
         if (allNotes.Count == 0)
         {
@@ -52,6 +44,6 @@ public class GetNoteRequestHandler : IRequestHandler<GetNoteBotRequestModel, Bot
             }
         }
 
-        return await _telegramService.SendMessageText(htmlMessage.ToString());
+        return await serviceFacade.TelegramService.SendMessageText(htmlMessage.ToString());
     }
 }

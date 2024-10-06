@@ -6,21 +6,14 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class CityController : CommandController
+public class CityController(MediatorService mediator) : CommandController
 {
-    private readonly MediatorService _mediator;
-
-    public CityController(MediatorService mediator)
-    {
-        _mediator = mediator;
-    }
-
     [Command("ac")]
     [Command("addcity")]
     [Command("add_city")]
     public async Task AddCity(MessageData data)
     {
-        await _mediator.EnqueueAsync(new AddCityBotRequest()
+        await mediator.EnqueueAsync(new AddCityBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -38,7 +31,7 @@ public class CityController : CommandController
     [Command("lc")]
     public async Task GetCity(MessageData data)
     {
-        await _mediator.EnqueueAsync(new GetCityListBotRequest()
+        await mediator.EnqueueAsync(new GetCityListBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,
@@ -56,7 +49,7 @@ public class CityController : CommandController
     [Command("sholat")]
     public async Task GetShalatTime(MessageData data)
     {
-        await _mediator.EnqueueAsync(new GetShalatTimeBotRequest()
+        await mediator.EnqueueAsync(new GetShalatTimeBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

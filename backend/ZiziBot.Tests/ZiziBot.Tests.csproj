@@ -6,12 +6,12 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="6.12.0"/>
+        <PackageReference Include="FluentAssertions" Version="6.12.1" />
         <PackageReference Include="JetBrains.Annotations" Version="2024.2.0"/>
         <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.2.20220510"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0"/>
-        <PackageReference Include="xunit" Version="2.9.0"/>
-        <PackageReference Include="Xunit.DependencyInjection" Version="9.3.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+        <PackageReference Include="xunit" Version="2.9.2" />
+        <PackageReference Include="Xunit.DependencyInjection" Version="9.4.0" />
         <PackageReference Include="Xunit.DependencyInjection.SkippableFact" Version="9.0.0"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

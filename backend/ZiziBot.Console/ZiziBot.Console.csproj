@@ -16,10 +16,10 @@
         <PackageReference Include="BlazorStateManager" Version="1.2.2"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8"/>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.8"/>
-        <PackageReference Include="Radzen.Blazor" Version="5.1.3"/>
-        <PackageReference Include="ReactiveUI.Blazor" Version="20.1.1"/>
+      <PackageReference Include="Radzen.Blazor" Version="5.2.9"/>
+        <PackageReference Include="ReactiveUI.Blazor" Version="20.1.63" />
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
-        <PackageReference Include="Scrutor" Version="4.2.2"/>
+        <PackageReference Include="Scrutor" Version="5.0.1" />
     </ItemGroup>
 
     <ItemGroup>

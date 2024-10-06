@@ -4,17 +4,8 @@ using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.Application.Services;
 
-public class JadwalSholatOrgSinkService
+public class JadwalSholatOrgSinkService(ILogger<JadwalSholatOrgSinkService> logger, MongoDbContextBase mongoDbContext)
 {
-    private readonly ILogger<JadwalSholatOrgSinkService> _logger;
-    private readonly MongoDbContextBase _mongoDbContext;
-
-    public JadwalSholatOrgSinkService(ILogger<JadwalSholatOrgSinkService> logger, MongoDbContextBase mongoDbContext)
-    {
-        _logger = logger;
-        _mongoDbContext = mongoDbContext;
-    }
-
     public async Task FeedAll()
     {
         await FeedCity();
@@ -37,19 +28,19 @@ public class JadwalSholatOrgSinkService
 
         if (insertCities != null)
         {
-            _logger.LogDebug("Deleting old cities..");
-            _mongoDbContext.JadwalSholatOrg_City.RemoveRange(entity => removeCityIds.Contains(entity.CityId));
-            await _mongoDbContext.SaveChangesAsync();
+            logger.LogDebug("Deleting old cities..");
+            mongoDbContext.JadwalSholatOrg_City.RemoveRange(entity => removeCityIds.Contains(entity.CityId));
+            await mongoDbContext.SaveChangesAsync();
 
-            _logger.LogDebug("Inserting new cities..");
-            _mongoDbContext.JadwalSholatOrg_City.AddRange(insertCities);
-            await _mongoDbContext.SaveChangesAsync();
+            logger.LogDebug("Inserting new cities..");
+            mongoDbContext.JadwalSholatOrg_City.AddRange(insertCities);
+            await mongoDbContext.SaveChangesAsync();
         }
     }
 
     public async Task FeedSchedule()
     {
-        var cities = await _mongoDbContext.JadwalSholatOrg_City.ToListAsync();
+        var cities = await mongoDbContext.JadwalSholatOrg_City.ToListAsync();
 
         foreach (var city in cities)
         {
@@ -78,17 +69,17 @@ public class JadwalSholatOrgSinkService
 
         if (insertSchedules.IsEmpty())
         {
-            _logger.LogInformation("No schedules found for city with ID {cityId}.", cityId);
+            logger.LogInformation("No schedules found for city with ID {cityId}.", cityId);
             return default;
         }
 
-        _logger.LogDebug("Deleting old schedules for city {cityId}..", cityId);
-        _mongoDbContext.JadwalSholatOrg_Schedule.RemoveRange(x => x.CityId == cityId);
-        await _mongoDbContext.SaveChangesAsync();
+        logger.LogDebug("Deleting old schedules for city {cityId}..", cityId);
+        mongoDbContext.JadwalSholatOrg_Schedule.RemoveRange(x => x.CityId == cityId);
+        await mongoDbContext.SaveChangesAsync();
 
-        _logger.LogDebug("Inserting new schedules for city {cityId}..", cityId);
-        _mongoDbContext.JadwalSholatOrg_Schedule.AddRange(insertSchedules);
-        await _mongoDbContext.SaveChangesAsync();
+        logger.LogDebug("Inserting new schedules for city {cityId}..", cityId);
+        mongoDbContext.JadwalSholatOrg_Schedule.AddRange(insertSchedules);
+        await mongoDbContext.SaveChangesAsync();
 
         return insertSchedules.Count;
     }

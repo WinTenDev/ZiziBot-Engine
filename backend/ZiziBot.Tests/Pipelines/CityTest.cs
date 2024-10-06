@@ -3,29 +3,16 @@ using Xunit;
 
 namespace ZiziBot.Tests.Pipelines;
 
-public class CityTest
+public class CityTest(MediatorService mediatorService, AppSettingRepository appSettingRepository, MongoDbContextBase mongoDbContext, FathimahApiService fathimahApiService)
 {
-    private readonly MediatorService _mediatorService;
-    private readonly AppSettingRepository _appSettingRepository;
-    private readonly MongoDbContextBase _mongoDbContext;
-    private readonly FathimahApiService _fathimahApiService;
-
-    public CityTest(MediatorService mediatorService, AppSettingRepository appSettingRepository, MongoDbContextBase mongoDbContext, FathimahApiService fathimahApiService)
-    {
-        _mediatorService = mediatorService;
-        _appSettingRepository = appSettingRepository;
-        _mongoDbContext = mongoDbContext;
-        _fathimahApiService = fathimahApiService;
-    }
-
     [Theory]
     [InlineData(712)]
     public async Task AddCityTest(int cityId)
     {
-        var botMain = await _appSettingRepository.GetBotMain();
+        var botMain = await appSettingRepository.GetBotMain();
 
         // Arrange
-        await _mediatorService.Send(new AddCityBotRequest()
+        await mediatorService.Send(new AddCityBotRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,
@@ -39,14 +26,14 @@ public class CityTest
     public async Task AddCityByNameTest(string cityName)
     {
         var chatId = SampleMessages.CommonMessage.Chat.Id;
-        var botMain = await _appSettingRepository.GetBotMain();
-        var cityInfoAll = await _fathimahApiService.GetAllCityAsync();
+        var botMain = await appSettingRepository.GetBotMain();
+        var cityInfoAll = await fathimahApiService.GetAllCityAsync();
 
         var cityInfo = cityInfoAll.Cities
             .WhereIf(cityName.IsNotNullOrEmpty(), kota => kota.Lokasi.Contains(cityName, StringComparison.OrdinalIgnoreCase))
             .FirstOrDefault();
 
-        var city = await _mongoDbContext.BangHasan_ShalatCity
+        var city = await mongoDbContext.BangHasan_ShalatCity
             .Where(entity => entity.ChatId == chatId)
             .Where(entity => entity.CityId == cityInfo.Id)
             .Where(entity => entity.Status == (int)EventStatus.Complete)
@@ -55,11 +42,11 @@ public class CityTest
         if (city != null)
         {
             city.Status = (int)EventStatus.Deleted;
-            await _mongoDbContext.SaveChangesAsync();
+            await mongoDbContext.SaveChangesAsync();
         }
 
         // Arrange
-        await _mediatorService.Send(new AddCityBotRequest()
+        await mediatorService.Send(new AddCityBotRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,
@@ -72,10 +59,10 @@ public class CityTest
     [InlineData("Cilacap")]
     public async Task AddCityByNameAlreadyAddedTest(string cityName)
     {
-        var botMain = await _appSettingRepository.GetBotMain();
+        var botMain = await appSettingRepository.GetBotMain();
 
         // Arrange
-        await _mediatorService.Send(new AddCityBotRequest()
+        await mediatorService.Send(new AddCityBotRequest()
         {
             BotToken = botMain.Token,
             Message = SampleMessages.CommonMessage,
@@ -88,7 +75,7 @@ public class CityTest
     [InlineData(-1001404591750)]
     public async Task ShalatTimeTest(long chatId)
     {
-        await _mediatorService.Send(new SendShalatTimeRequest()
+        await mediatorService.Send(new SendShalatTimeRequest()
         {
             ChatId = chatId
         });

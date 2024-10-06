@@ -4,17 +4,17 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace ZiziBot.Application.Handlers.Telegram.Inline;
 
 public class AnswerInlineQueryGuideBotRequestModel : BotRequestBase
-{
-}
+{ }
 
-public class AnswerInlineQueryGuideRequestHandler(TelegramService telegramService)
-    : IRequestHandler<AnswerInlineQueryGuideBotRequestModel, BotResponseBase>
+public class AnswerInlineQueryGuideRequestHandler(
+    ServiceFacade serviceFacade
+) : IRequestHandler<AnswerInlineQueryGuideBotRequestModel, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(AnswerInlineQueryGuideBotRequestModel request, CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
-        return await telegramService.AnswerInlineQueryAsync(new List<InlineQueryResult>() {
+        return await serviceFacade.TelegramService.AnswerInlineQueryAsync(new List<InlineQueryResult>() {
             new InlineQueryResultArticle(
                 id: "guide-1",
                 title: "Bagaimana cara menggunakannya?",
@@ -39,7 +39,7 @@ public class AnswerInlineQueryGuideRequestHandler(TelegramService telegramServic
 
 public static class InlineDefaults
 {
-    public static readonly InlineKeyboardMarkup DefaultButtonMarkup = new(new[] {
+    public readonly static InlineKeyboardMarkup DefaultButtonMarkup = new(new[] {
         new[] {
             InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("Ping", $"ping "),
             InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("Api doc", $"api-doc ")
@@ -52,7 +52,7 @@ public static class InlineDefaults
 
     public const string InlineQueryDoc = "https://docs.zizibot.winten.my.id/features/inline-query";
 
-    public static readonly string DefaultGuideText = $"Silakan pelajari selengkapnya" +
+    public readonly static string DefaultGuideText = $"Silakan pelajari selengkapnya" +
                                                      $"\n{InlineQueryDoc}" +
                                                      $"\n\nAtau tekan salah satu tombol dibawah ini";
 }

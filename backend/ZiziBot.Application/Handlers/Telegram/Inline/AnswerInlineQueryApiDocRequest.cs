@@ -11,21 +11,19 @@ public class AnswerInlineQueryApiDocBotRequestModel : BotRequestBase
     public string? Query { get; set; }
 }
 
-public class
-    AnswerInlineQueryApiDocRequestHandler(
-        ILogger<AnswerInlineQueryApiDocRequestHandler> logger,
-        TelegramService telegramService,
-        CacheService cacheService)
-    : IRequestHandler<AnswerInlineQueryApiDocBotRequestModel, BotResponseBase>
+public class AnswerInlineQueryApiDocRequestHandler(
+    ILogger<AnswerInlineQueryApiDocRequestHandler> logger,
+    ServiceFacade serviceFacade
+) : IRequestHandler<AnswerInlineQueryApiDocBotRequestModel, BotResponseBase>
 {
     public async Task<BotResponseBase> Handle(AnswerInlineQueryApiDocBotRequestModel request,
         CancellationToken cancellationToken)
     {
-        telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         logger.LogInformation("Find api doc for Query: {query}", request.Query);
 
-        var cache = await cacheService.GetOrSetAsync(
+        var cache = await serviceFacade.CacheService.GetOrSetAsync(
             cacheKey: CacheKey.GLOBAL_API_DOC,
             action: async () => {
                 var api = await UrlConst.BOT_API_SPEC.GetJsonAsync<TgBotApiDoc>(cancellationToken: cancellationToken);
@@ -84,6 +82,6 @@ public class
         var learnMoreContent = $"Silakan mauskkan nama method/typw";
 
 
-        return await telegramService.AnswerInlineQueryAsync(inlineQueryResults);
+        return await serviceFacade.TelegramService.AnswerInlineQueryAsync(inlineQueryResults);
     }
 }

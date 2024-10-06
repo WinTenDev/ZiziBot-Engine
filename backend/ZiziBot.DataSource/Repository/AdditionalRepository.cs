@@ -4,18 +4,11 @@ using ZiziBot.DataSource.MongoDb.Entities;
 
 namespace ZiziBot.DataSource.Repository;
 
-public class AdditionalRepository
+public class AdditionalRepository(MongoDbContextBase mongoDbContextBase)
 {
-    private readonly MongoDbContextBase _mongoDbContextBase;
-
-    public AdditionalRepository(MongoDbContextBase mongoDbContextBase)
-    {
-        _mongoDbContextBase = mongoDbContextBase;
-    }
-
     public async Task<TonjooAwbEntity?> GetStoredAwb(string courier, string awb)
     {
-        var awbInfo = await _mongoDbContextBase.TonjooAwb
+        var awbInfo = await mongoDbContextBase.TonjooAwb
             .Where(entity => entity.Awb == awb)
             .Where(entity => entity.Status == (int)EventStatus.Complete)
             .FirstOrDefaultAsync();
@@ -25,13 +18,13 @@ public class AdditionalRepository
 
     public async Task SaveAwbInfo(TonjooAwbDetail detail)
     {
-        _mongoDbContextBase.TonjooAwb.Add(new TonjooAwbEntity() {
+        mongoDbContextBase.TonjooAwb.Add(new TonjooAwbEntity() {
             Awb = detail.Code,
             Courier = detail.Kurir.FirstOrDefault("N/A").ToLower(),
             Detail = detail,
             Status = (int)EventStatus.Complete
         });
 
-        await _mongoDbContextBase.SaveChangesAsync();
+        await mongoDbContextBase.SaveChangesAsync();
     }
 }

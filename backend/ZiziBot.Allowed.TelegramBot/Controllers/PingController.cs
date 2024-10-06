@@ -5,20 +5,13 @@ using Allowed.Telegram.Bot.Models;
 namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class PingController : CommandController
+public class PingController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public PingController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("ping")]
     [TextCommand("ping")]
     public async Task Ping(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new PingBotRequestModel() {
+        await mediatorService.EnqueueAsync(new PingBotRequestModel() {
                 BotToken = data.Options.Token,
                 Message = data.Message,
                 DeleteAfter = TimeSpan.FromMinutes(1),
@@ -34,7 +27,7 @@ public class PingController : CommandController
     [CallbackQuery(CallbackConst.BOT)]
     public async Task PingCallback(CallbackQueryData data, PingCallbackQueryModel model)
     {
-        await _mediatorService.EnqueueAsync(new PingCallbackBotRequestModel() {
+        await mediatorService.EnqueueAsync(new PingCallbackBotRequestModel() {
                 BotToken = data.Options.Token,
                 CallbackQuery = data.CallbackQuery,
                 ExecutionStrategy = ExecutionStrategy.Hangfire
@@ -46,7 +39,7 @@ public class PingController : CommandController
     [TextCommand()]
     public async Task Default(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new DefaultBotRequestModel() {
+        await mediatorService.EnqueueAsync(new DefaultBotRequestModel() {
                 BotToken = data.Options.Token,
                 Message = data.Message
             }

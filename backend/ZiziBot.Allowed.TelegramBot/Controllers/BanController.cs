@@ -6,19 +6,12 @@ namespace ZiziBot.Allowed.TelegramBot.Controllers;
 
 [BotName("Main")]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class BanController : CommandController
+public class BanController(MediatorService mediatorService) : CommandController
 {
-    private readonly MediatorService _mediatorService;
-
-    public BanController(MediatorService mediatorService)
-    {
-        _mediatorService = mediatorService;
-    }
-
     [Command("gban")]
     public async Task AddGlobalBan(MessageData data)
     {
-        await _mediatorService.EnqueueAsync(new AddBanBotRequest()
+        await mediatorService.EnqueueAsync(new AddBanBotRequest()
         {
             BotToken = data.Options.Token,
             Message = data.Message,

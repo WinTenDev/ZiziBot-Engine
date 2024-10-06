@@ -4,9 +4,8 @@ using ZiziBot.Types.Types;
 
 namespace ZiziBot.Console.ViewModels;
 
-public class MirrorSubscriptionViewModel : ReactiveObject, IActivatableViewModel
+public class MirrorSubscriptionViewModel(MongoDbContextBase mongoDbContextBase) : ReactiveObject, IActivatableViewModel
 {
-    private readonly MongoDbContextBase _mongoDbContextBase;
     public ViewModelActivator Activator { get; }
     public LoadingConfiguration Loading { get; set; } = new();
 
@@ -14,11 +13,6 @@ public class MirrorSubscriptionViewModel : ReactiveObject, IActivatableViewModel
     public List<MirrorUserEntity>? MirrorUsers { get; set; }
 
     public List<MirrorApprovalEntity>? MirrorApprovals { get; set; }
-
-    public MirrorSubscriptionViewModel(MongoDbContextBase mongoDbContextBase)
-    {
-        _mongoDbContextBase = mongoDbContextBase;
-    }
 
     public async Task LoadData()
     {
@@ -33,7 +27,7 @@ public class MirrorSubscriptionViewModel : ReactiveObject, IActivatableViewModel
         Loading.CurrentStep++;
         Loading.Title = "Loading Mirror Users";
 
-        MirrorUsers = await _mongoDbContextBase.MirrorUsers
+        MirrorUsers = await mongoDbContextBase.MirrorUsers
             .Where(x => x.Status == (int)EventStatus.Complete)
             .OrderByDescending(o => o.UpdatedDate)
             .ToListAsync();
@@ -49,7 +43,7 @@ public class MirrorSubscriptionViewModel : ReactiveObject, IActivatableViewModel
         Loading.CurrentStep++;
         Loading.Title = "Loading Mirror Approvals";
 
-        MirrorApprovals = await _mongoDbContextBase.MirrorApproval
+        MirrorApprovals = await mongoDbContextBase.MirrorApproval
             .Where(x => x.Status == (int)EventStatus.Complete)
             .OrderByDescending(o => o.UpdatedDate)
             .ToListAsync();

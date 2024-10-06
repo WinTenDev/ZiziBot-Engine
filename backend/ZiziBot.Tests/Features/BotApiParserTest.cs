@@ -6,15 +6,8 @@ using Xunit;
 
 namespace ZiziBot.Tests.Features;
 
-public class BotApiParserTest
+public class BotApiParserTest(ILogger<BotApiParserTest> logger)
 {
-    private readonly ILogger<BotApiParserTest> _logger;
-
-    public BotApiParserTest(ILogger<BotApiParserTest> logger)
-    {
-        _logger = logger;
-    }
-
     [Theory]
     [InlineData("https://core.telegram.org/bots/api")]
     public async Task ParseWebTest(string url)
@@ -58,7 +51,7 @@ public class BotApiParserTest
     [InlineData("https://raw.githubusercontent.com/PaulSonOfLars/telegram-bot-api-spec/main/api.min.json")]
     public async Task ParseSpec(string url)
     {
-        _logger.LogInformation("Parsing spec from {url}", url);
+        logger.LogInformation("Parsing spec from {url}", url);
 
         var api = await url.GetJsonAsync<TgBotApiDoc>();
 

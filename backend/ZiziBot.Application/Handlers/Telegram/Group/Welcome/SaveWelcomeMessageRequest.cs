@@ -4,50 +4,41 @@ using ZiziBot.DataSource.MongoDb.Entities;
 namespace ZiziBot.Application.Handlers.Telegram.Group.Welcome;
 
 public class SaveWelcomeMessageRequest : BotRequestBase
+{ }
+
+public class SaveWelcomeMessageHandler(
+    DataFacade dataFacade,
+    ServiceFacade serviceFacade
+)
+    : IRequestHandler<SaveWelcomeMessageRequest, BotResponseBase>
 {
-}
-
-public class SaveWelcomeMessageHandler : IRequestHandler<SaveWelcomeMessageRequest, BotResponseBase>
-{
-    private readonly TelegramService _telegramService;
-    private readonly MongoDbContextBase _mongoDbContext;
-    private readonly GroupRepository _groupRepository;
-
-    public SaveWelcomeMessageHandler(TelegramService telegramService, MongoDbContextBase mongoDbContext,
-        GroupRepository groupRepository)
-    {
-        _telegramService = telegramService;
-        _mongoDbContext = mongoDbContext;
-        _groupRepository = groupRepository;
-    }
-
     public async Task<BotResponseBase> Handle(SaveWelcomeMessageRequest request, CancellationToken cancellationToken)
     {
-        _telegramService.SetupResponse(request);
+        serviceFacade.TelegramService.SetupResponse(request);
 
         if (request.ReplyToMessage == null)
         {
-            return await _telegramService.SendMessageAsync("Balas pesan untuk disimpan");
+            return await serviceFacade.TelegramService.SendMessageAsync("Balas pesan untuk disimpan");
         }
 
-        await _telegramService.SendMessageAsync("Sedang menyimpan..");
+        await serviceFacade.TelegramService.SendMessageAsync("Sedang menyimpan..");
 
-        var welcomeMessage = await _mongoDbContext.WelcomeMessage
+        var welcomeMessage = await dataFacade.MongoDb.WelcomeMessage
             .Where(e => e.ChatId == request.ChatIdentifier)
             .Where(e => e.Status == (int)EventStatus.Complete)
             .FirstOrDefaultAsync();
 
         if (welcomeMessage == null)
         {
-            _mongoDbContext.WelcomeMessage.Add(new WelcomeMessageEntity() {
+            dataFacade.MongoDb.WelcomeMessage.Add(new WelcomeMessageEntity() {
                 ChatId = request.ChatIdentifier,
                 UserId = request.User!.Id,
                 Status = (int)EventStatus.Complete,
             });
 
-            await _mongoDbContext.SaveChangesAsync(cancellationToken);
+            await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-            welcomeMessage = await _groupRepository.GetWelcomeMessage(request.ChatIdentifier);
+            welcomeMessage = await dataFacade.Group.GetWelcomeMessage(request.ChatIdentifier);
         }
 
         switch (request.Command)
@@ -66,8 +57,8 @@ public class SaveWelcomeMessageHandler : IRequestHandler<SaveWelcomeMessageReque
                 throw new ArgumentOutOfRangeException();
         }
 
-        await _mongoDbContext.SaveChangesAsync(cancellationToken);
+        await dataFacade.MongoDb.SaveChangesAsync(cancellationToken);
 
-        return await _telegramService.SendMessageAsync($"Berhasil menyimpan. {request.Command}");
+        return await serviceFacade.TelegramService.SendMessageAsync($"Berhasil menyimpan. {request.Command}");
     }
 }

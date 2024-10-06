@@ -11,7 +11,6 @@ FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_TAG} AS build
 WORKDIR /build
 COPY . .
 RUN dotnet restore "backend/ZiziBot.Engine/ZiziBot.Engine.csproj"
-RUN dotnet run --project "backend/ZiziBot.Cli/ZiziBot.Cli.csproj"  --toolName=UpdateVersion --mode=DependsOnCondition
 
 WORKDIR "/build/backend/ZiziBot.Engine"
 RUN dotnet build "ZiziBot.Engine.csproj" -c Release -o /app/build
