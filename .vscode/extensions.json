@@ -5,6 +5,7 @@
         "ms-dotnettools.csdevkit",
         "mongodb.mongodb-vscode",
         "sonarsource.sonarlint-vscode",
-        "jetbrains.resharper-code"
+        "hverlin.mise-vscode",
+        "blipk.csharp"
     ]
 }

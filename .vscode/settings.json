@@ -1,4 +1,3 @@
 {
-    "files.autoSave": "afterDelay",
-    "dotnet.defaultSolution": "ZiziBot.sln"
+    "files.autoSave": "afterDelay"
 }

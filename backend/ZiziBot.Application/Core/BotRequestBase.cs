@@ -1,10 +1,10 @@
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using ZiziBot.Common.Types;
+using ZiziBot.Application.Common.Types;
 
 namespace ZiziBot.Application.Core;
 
-public class BotRequestBase : IRequest<BotResponseBase>
+public class BotRequestBase : IAppCommand<BotResponseBase>, ITelegramRequest
 {
     public RoleLevel MinimumRole { get; set; }
     public List<RoleLevel> RolesLevels { get; set; } = new();

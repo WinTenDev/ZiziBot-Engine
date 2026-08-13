@@ -1,5 +1,4 @@
 using Xunit;
-using ZiziBot.Services.Rest;
 
 namespace ZiziBot.Tests.Services;
 
@@ -7,7 +6,8 @@ public class FathimahRestServiceTests(
     FathimahRestService fathimahRestService
 )
 {
-    public static readonly object[][] ShalatCity = [
+    public static readonly object[][] ShalatCity =
+    [
         [DateTime.Now, 1203],
         // [DateTime.Now.AddMonths(-2).AddDays(10).AddYears(-1), 1203],
         // [new DateTime(2022, 3, 1), 1203]
@@ -29,6 +29,6 @@ public class FathimahRestServiceTests(
 
         shalatTime.Status.ShouldBe(true);
         shalatTime.Schedule.ShouldNotBeNull()
-                  .ShalatDict.ShouldNotBeNull().ShouldNotBeEmpty();
+            .ShalatDict.ShouldNotBeNull().ShouldNotBeEmpty();
     }
 }

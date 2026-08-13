@@ -1,6 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Xunit.DependencyInjection;
+using ZiziBot.Application.Infrastructure.Extensions;
 using ZiziBot.Tests.Interfaces;
 
 namespace ZiziBot.Tests;
@@ -14,7 +15,7 @@ public class Startup : IStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        _ = services.ConfigureServices().Result;
+        services.ConfigureServices();
     }
 
     public void Configure(IServiceProvider provider, ITestOutputHelperAccessor accessor)

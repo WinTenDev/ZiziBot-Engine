@@ -4,9 +4,9 @@ using Octokit.Webhooks;
 using Octokit.Webhooks.Events;
 using Octokit.Webhooks.Events.PullRequest;
 using Octokit.Webhooks.Events.Star;
-using ZiziBot.Common.Types;
-using ZiziBot.Common.Vendor.GitHub;
-using ZiziBot.Common.Vendor.GitLab;
+using ZiziBot.Application.Common.Types;
+using ZiziBot.Application.Infrastructure.Vendor.GitHub;
+using ZiziBot.Application.Infrastructure.Vendor.GitLab;
 
 namespace ZiziBot.Application.Services;
 

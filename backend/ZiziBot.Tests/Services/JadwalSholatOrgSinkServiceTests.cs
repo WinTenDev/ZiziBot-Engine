@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MoreLinq;
 using SharpX.Extensions;
 using Xunit;
-using ZiziBot.Database.Service;
+using ZiziBot.Application.Infrastructure.Database.Service;
 
 namespace ZiziBot.Tests.Services;
 

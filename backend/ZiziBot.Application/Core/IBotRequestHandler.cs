@@ -1,6 +1,8 @@
-﻿namespace ZiziBot.Application.Core;
+namespace ZiziBot.Application.Core;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
-public interface IBotRequestHandler<in TRequest> : IRequestHandler<TRequest, BotResponseBase> where TRequest : BotRequestBase
+public interface IBotRequestHandler<TRequest>
+    : IAppCommandHandler<TRequest, BotResponseBase>
+    where TRequest : BotRequestBase
 {
 }

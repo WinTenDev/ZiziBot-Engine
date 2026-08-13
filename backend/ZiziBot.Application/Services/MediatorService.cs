@@ -1,17 +1,19 @@
-using System.ComponentModel;
-using CloudCraic.Hosting.BackgroundQueue;
+﻿using System.ComponentModel;
+using DalSoft.Hosting.BackgroundQueue;
 using Hangfire;
 using Microsoft.Extensions.Logging;
+using ZiziBot.Application.Common.Exceptions;
 
 namespace ZiziBot.Application.Services;
 
 public class MediatorService(
     ILogger<MediatorService> logger,
-    IMediator mediator,
+    IAppMediator mediator,
     IBackgroundQueue backgroundQueue
 )
 {
     #region Execution
+
     public async Task<BotResponseBase> EnqueueAsync(BotRequestBase request)
     {
         BotResponseBase botResponse = new();
@@ -25,13 +27,13 @@ public class MediatorService(
 
                 break;
             case ExecutionStrategy.Background:
-                backgroundQueue.Enqueue(async token => await mediator.Send(request, token));
+                backgroundQueue.Enqueue(async token => await mediator.SendAsync(request, token));
 
                 break;
             case ExecutionStrategy.Instant:
-                return await mediator.Send(request);
+                return await mediator.SendAsync(request);
             default:
-                throw new ArgumentOutOfRangeException(nameof(request.ExecutionStrategy), request.ExecutionStrategy, "Unknown execution strategy");
+                throw new AppException("Unknown execution strategy");
         }
 
         return botResponse.Complete();
@@ -46,16 +48,14 @@ public class MediatorService(
 
                 return new();
 
-                break;
-
             case ExecutionStrategy.Instant:
-                return await mediator.Send(request);
+                return await mediator.SendAsync(request);
             default:
                 throw new ArgumentOutOfRangeException(nameof(executionStrategy));
         }
     }
 
-    public async Task<T> EnqueueAsync<T>(IRequest<T> request, ExecutionStrategy executionStrategy = default) where T : new()
+    public async Task<T> EnqueueAsync<T>(IAppCommand<T> request, ExecutionStrategy executionStrategy = default) where T : new()
     {
         switch (executionStrategy)
         {
@@ -64,10 +64,8 @@ public class MediatorService(
 
                 return new();
 
-                break;
-
             case ExecutionStrategy.Instant:
-                return await mediator.Send(request);
+                return await mediator.SendAsync(request);
             default:
                 throw new ArgumentOutOfRangeException(nameof(executionStrategy));
         }
@@ -80,21 +78,24 @@ public class MediatorService(
 
         return botResponse.Complete();
     }
+
     #endregion
 
     #region Bridge
+
     [DisplayName("{0}")]
     [AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete, Attempts = 3)]
-    public async Task<TResponse?> Send<TResponse>(IRequest<TResponse> request)
+    public async Task<TResponse?> Send<TResponse>(IAppCommand<TResponse> request)
     {
-        return await mediator.Send(request);
+        return await mediator.SendAsync(request);
     }
 
     [DisplayName("{0}")]
     [AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete, Attempts = 3)]
-    public async Task<TResponse?> Send<TResponse>(string jobName, IRequest<TResponse> request)
+    public async Task<TResponse?> Send<TResponse>(string jobName, IAppCommand<TResponse> request)
     {
-        return await mediator.Send(request);
+        return await mediator.SendAsync(request);
     }
+
     #endregion
 }

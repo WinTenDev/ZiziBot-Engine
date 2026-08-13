@@ -275,3 +275,5 @@ FodyWeavers.*
 .vercel
 .turbo
 .qodo
+
+build_log.txt

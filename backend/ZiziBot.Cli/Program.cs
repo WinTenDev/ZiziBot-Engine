@@ -4,6 +4,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
 using Microsoft.Extensions.Hosting;
+using ZiziBot.Application.Infrastructure.Extensions;
 
 await CmdRoot.CreateCommandLineBuilder()
     .UseHost(x => Host.CreateDefaultBuilder(),

@@ -6,7 +6,7 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
     <InvariantGlobalization>false</InvariantGlobalization>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <TargetPort>7120</TargetPort>
   </PropertyGroup>
 
@@ -23,17 +23,11 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.10"/>
+    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.9"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZiziBot.Application\ZiziBot.Application.csproj"/>
-    <ProjectReference Include="..\ZiziBot.Console\ZiziBot.Console.csproj"/>
-    <ProjectReference Include="..\ZiziBot.Database\ZiziBot.Database.csproj"/>
-    <ProjectReference Include="..\ZiziBot.DiscordNet.DiscordBot\ZiziBot.DiscordNet.DiscordBot.csproj"/>
-    <ProjectReference Include="..\ZiziBot.Scheduler\ZiziBot.Scheduler.csproj"/>
-    <ProjectReference Include="..\ZiziBot.Infrastructure\ZiziBot.Infrastructure.csproj"/>
-    <ProjectReference Include="..\ZiziBot.TelegramBot\ZiziBot.TelegramBot.csproj"/>
-    <ProjectReference Include="..\ZiziBot.WebApi\ZiziBot.WebApi.csproj"/>
+    <ProjectReference Include="..\ZiziBot.Presentation\ZiziBot.Presentation.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <None Update=".env">

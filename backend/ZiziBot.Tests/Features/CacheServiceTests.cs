@@ -1,7 +1,7 @@
-using Xunit;
-using ZiziBot.Common.Dtos;
-using ZiziBot.Common.Types;
-using ZiziBot.Database.Service;
+﻿using Xunit;
+using ZiziBot.Application.Common.Dtos;
+using ZiziBot.Application.Common.Types;
+using ZiziBot.Application.Infrastructure.Database.Service;
 
 namespace ZiziBot.Tests.Features;
 
@@ -23,15 +23,12 @@ public class CacheServiceTests(CacheService cacheService)
     [Fact]
     public async Task GetSetV2()
     {
-        await cacheService.GetOrSetAsyncV2(
+        await cacheService.GetOrSetAsync(
             cacheKey: "a",
             action: async () =>
             {
                 await Task.Delay(0);
-                return new CacheReturn<AntiSpamDto>()
-                {
-                    Data = new AntiSpamDto()
-                };
+                return new AntiSpamDto();
             }
         );
     }

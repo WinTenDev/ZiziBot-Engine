@@ -1,36 +1,11 @@
 <Solution>
-  <Folder Name="/01. Host/">
-    <Project Path="backend/ZiziBot.Cli/ZiziBot.Cli.csproj"/>
-    <Project Path="backend/ZiziBot.Engine/ZiziBot.Engine.csproj"/>
-  </Folder>
-  <Folder Name="/02. Bots/">
-    <Project Path="backend/ZiziBot.DiscordNet.DiscordBot/ZiziBot.DiscordNet.DiscordBot.csproj"/>
-    <Project Path="backend/ZiziBot.TelegramBot/ZiziBot.TelegramBot.csproj"/>
-  </Folder>
-  <Folder Name="/04. Usecase/">
-    <Project Path="backend/ZiziBot.Application/ZiziBot.Application.csproj"/>
-    <Project Path="backend/ZiziBot.Services/ZiziBot.Services.csproj"/>
-  </Folder>
-  <Folder Name="/05. Features/">
-    <Project Path="backend/ZiziBot.Scheduler/ZiziBot.Scheduler.csproj"/>
-    <Project Path="backend/ZiziBot.WebApi/ZiziBot.WebApi.csproj"/>
-  </Folder>
-  <Folder Name="/06. Console/">
-    <Project Path="backend/ZiziBot.Console/ZiziBot.Console.csproj"/>
-  </Folder>
-  <Folder Name="/07. Stuff/">
-    <Project Path="backend/ZiziBot.Attributes/ZiziBot.Attributes.csproj"/>
-    <Project Path="backend/ZiziBot.Common/ZiziBot.Common.csproj"/>
-    <Project Path="backend/ZiziBot.Database/ZiziBot.Database.csproj"/>
-    <Project Path="backend/ZiziBot.Infrastructure/ZiziBot.Infrastructure.csproj"/>
-  </Folder>
-  <Folder Name="/08. Libs/">
+  <Project Path="backend/ZiziBot.Cli/ZiziBot.Cli.csproj"/>
+  <Project Path="backend/ZiziBot.Engine/ZiziBot.Engine.csproj"/>
+  <Project Path="backend/ZiziBot.Application/ZiziBot.Application.csproj"/>
+  <Project Path="backend/ZiziBot.Presentation/ZiziBot.Presentation.csproj"/>
+  <Folder Name="/lib/">
     <Project Path="backend/lib/ZiziBot.TelegramBot/ZiziBot.TelegramBot.Framework/ZiziBot.TelegramBot.Framework.csproj"/>
-  </Folder>
-  <Folder Name="/10. Labs/">
     <Project Path="backend/lib/ZiziBot.TelegramBot/ZiziBot.TelegramBot.Sample/ZiziBot.TelegramBot.Sample.csproj"/>
   </Folder>
-  <Folder Name="/11. Tests/">
-    <Project Path="backend/ZiziBot.Tests/ZiziBot.Tests.csproj"/>
-  </Folder>
+  <Project Path="backend/ZiziBot.Tests/ZiziBot.Tests.csproj"/>
 </Solution>

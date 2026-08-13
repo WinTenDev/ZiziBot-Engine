@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
-using ZiziBot.Common.Types;
+using ZiziBot.Application.Common.Types;
 
 namespace ZiziBot.Cli.Tools;
 

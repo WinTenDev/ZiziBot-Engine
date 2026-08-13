@@ -1,6 +1,6 @@
-﻿namespace ZiziBot.Application.Core;
+namespace ZiziBot.Application.Core;
 
-public interface IWebhookRequestBase<TResult> : IRequest<WebhookResponseBase<TResult>>
+public interface IWebhookRequestBase<TResult> : IAppCommand<WebhookResponseBase<TResult>>
 {
 }
 

@@ -1,7 +1,7 @@
-using Flurl.Http;
+﻿using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using Xunit;
-using ZiziBot.Common.Types;
+using ZiziBot.Application.Common.Types;
 
 namespace ZiziBot.Tests.Features;
 

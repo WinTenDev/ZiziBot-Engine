@@ -1,5 +1,4 @@
 using Xunit;
-using ZiziBot.Services.Client;
 
 namespace ZiziBot.Tests.Services;
 

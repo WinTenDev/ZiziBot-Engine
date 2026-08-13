@@ -1,6 +1,6 @@
 ﻿using Flurl.Http;
 using Microsoft.Extensions.Logging;
-using ZiziBot.Common.Vendor.UupDump;
+using ZiziBot.Application.Infrastructure.Vendor.UupDump;
 
 namespace ZiziBot.Application.Services;
 

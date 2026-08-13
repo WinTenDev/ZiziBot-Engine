@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using AsyncAwaitBestPractices;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
@@ -8,18 +8,18 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
-using ZiziBot.Application.Handlers.Telegram.Core;
-using ZiziBot.Application.UseCases.Chat;
-using ZiziBot.Common.Dtos;
-using ZiziBot.Common.Types;
-using CreateChatActivityRequest = ZiziBot.Application.UseCases.Chat.CreateChatActivityRequest;
+using ZiziBot.Application.Features.Hangfire;
+using ZiziBot.Application.Features.Handlers.Telegram.Core;
+using ZiziBot.Application.Features.UseCases.Chat;
+using ZiziBot.Application.Common.Dtos;
+using ZiziBot.Application.Common.Types;
+using CreateChatActivityRequest = ZiziBot.Application.Features.UseCases.Chat.CreateChatActivityRequest;
 using File = System.IO.File;
 
 namespace ZiziBot.Application.Services;
 
 public class TelegramService(
     ILogger<TelegramService> logger,
-    IMediator mediator,
     CacheService cacheService,
     MediatorService mediatorService,
     DataFacade dataFacade

@@ -1,10 +1,10 @@
-using System.Net;
+﻿using System.Net;
 using Flurl;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ZiziBot.Common.Dtos;
-using ZiziBot.Common.Types;
+using ZiziBot.Application.Common.Dtos;
+using ZiziBot.Application.Common.Types;
 
 namespace ZiziBot.Application.Services;
 

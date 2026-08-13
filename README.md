@@ -1,3 +1,5 @@
+
+
 <p align="center">
     <a href="https://gitpod.io/#https://github.com/azhe403/ZiziBot-Engine">
         <img src="https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod" alt="Gitpod ready-to-code" />
@@ -29,7 +31,7 @@ The **ZiziBot** project is made possible by these awesome open source projects:
     <li><a href="https://github.com/azhe403/ZiziBot.TelegramBot" target="_blank">ZiziBot.TelegramBot</a></li>
     <li><a href="https://github.com/wiz0u/WTelegramBot" target="_blank">WTelegramBot</a></li>
     <li><a href="https://github.com/HangfireIO" target="_blank">Hangfire</a></li>
-    <li><a href="https://github.com/jbogard/MediatR" target="_blank">MediatR</a></li>
+    <li><a href="https://github.com/buildersoftio/cortex" target="_blank">Cortex.Mediator</a></li>
     <li><a href="https://github.com/TurnerSoftware/MongoFramework" target="_blank">MongoFramework</a></li>
     <li><a href="https://github.com/TurnerSoftware/CacheTower" target="_blank">CacheTower</a></li>
     <li><a href="https://github.com/TelegramBots/Telegram.Bot" target="_blank">Telegram.Bot</a></li>
@@ -43,8 +45,7 @@ The **ZiziBot** project is made possible by these awesome open source projects:
 
 # Shoutouts
 
-Thanks to JetBrains have given us for
-<a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
+Thanks to JetBrains for providing us with <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
 
 <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">
     <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="Rider logo.">

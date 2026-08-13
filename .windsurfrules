@@ -1,4 +1,0 @@
-- db: mongodb
-- lang: csharp, js, ts
-- tech: react, nextjs, hangfire, mongo, official mongo with ef core
-- use pnpm for package manager

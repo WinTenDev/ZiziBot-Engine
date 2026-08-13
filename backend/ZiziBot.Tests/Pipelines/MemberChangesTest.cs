@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Xunit;
-using ZiziBot.Database.Service;
+using ZiziBot.Application.Infrastructure.Database.Service;
 
 namespace ZiziBot.Tests.Pipelines;
 

@@ -1,6 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.Logging;
-using ZiziBot.Application.UseCases.Rss;
+using ZiziBot.Application.Features.UseCases.Rss;
 
 namespace ZiziBot.Application.Services;
 

@@ -1,6 +1,7 @@
-﻿namespace ZiziBot.Application.Core;
+namespace ZiziBot.Application.Core;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
-public interface IWebRequestHandler<in TRequest, TResponse> : IRequestHandler<TRequest, WebResponseBase<TResponse>>
-    where TRequest : IRequest<WebResponseBase<TResponse>>
+public interface IWebRequestHandler<TRequest, TResponse>
+    : IAppCommandHandler<TRequest, WebResponseBase<TResponse>>
+    where TRequest : IAppCommand<WebResponseBase<TResponse>>
 { }
