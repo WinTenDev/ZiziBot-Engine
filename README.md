@@ -1,3 +1,5 @@
+
+
 <p align="center">
     <a href="https://gitpod.io/#https://github.com/azhe403/ZiziBot-Engine">
         <img src="https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod" alt="Gitpod ready-to-code" />
@@ -43,8 +45,7 @@ The **ZiziBot** project is made possible by these awesome open source projects:
 
 # Shoutouts
 
-Thanks to JetBrains have given us for
-<a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
+Thanks to JetBrains for providing us with <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
 
 <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">
     <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="Rider logo.">
